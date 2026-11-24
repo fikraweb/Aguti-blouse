@@ -6,7 +6,7 @@ Boutique de vêtements professionnels au Maroc avec catalogue, panier, paiement 
 
 Utilisez Node.js 24 ou une version ultérieure. Depuis le dépôt existant, lancez `npm ci` puis `npm run dev`. Le serveur écoute par défaut sur le port 3000.
 
-Le catalogue de démonstration compte huit produits et cinq catégories. Les visuels WebP sont générés et les témoignages sont des exemples. Remplacez-les par vos photos produit et des avis autorisés avant l’ouverture.
+Le catalogue initial présente deux coupes de la tenue médicale à col V, avec les onze couleurs de la photo fournie. Le prix initial de 299 MAD et les tailles XS à XXL sont modifiables dans l’administration. Les témoignages sont des exemples.
 
 ## Administration et commandes
 

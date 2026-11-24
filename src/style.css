@@ -210,3 +210,18 @@ body:has(dialog[open]){overflow:hidden}
  .hero-inner{padding-block:clamp(226px,65vw,370px) 32px}
  [dir=rtl] .hero-inner{justify-items:start;text-align:right}
 }
+.reference-crop{display:block;position:relative;overflow:hidden;max-width:100%}
+.reference-crop img{position:absolute;top:0;left:0;max-width:none;height:auto;object-fit:initial}
+.product-photo .uniform-photo{width:100%;height:100%}
+.product-photo .reference-crop img{height:auto}
+.gallery .gallery-main{display:block;margin:0;height:min(64vw,620px);overflow:hidden;border-radius:10px;background:#eef0f2}
+.gallery-main>img,.gallery-main>.uniform-photo{height:100%;width:100%}
+.gallery-main .uniform-photo{width:min(100%,350px);margin-inline:auto}
+.detail-modal .gallery-main{height:390px}
+.fabric-preview{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.fabric-preview .reference-crop{width:34px;height:49px;border-radius:5px}
+.cart-item .reference-crop{width:56px;height:70px;border-radius:5px}
+.cart-item .reference-crop img{height:auto}
+.category-grid:has(> :only-child){grid-template-columns:minmax(0,320px)}
+.product-grid:has(> :nth-child(2):last-child){grid-template-columns:repeat(2,minmax(0,320px))}
+@media(max-width:600px){.gallery .gallery-main{height:min(95vw,520px)}.detail-modal .gallery-main{height:220px}}
