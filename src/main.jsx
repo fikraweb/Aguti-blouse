@@ -8,8 +8,9 @@ const Admin=React.lazy(()=>import('./admin.jsx').then(module=>({default:module.A
 
 export async function api(path,method='GET',body) {
  const res=await fetch('/api'+path,{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});
- const data=await res.json().catch(()=>({}));
- if(!res.ok) throw new Error(data.error || 'Une erreur est survenue. Réessayez.');
+ const data=await res.json().catch(()=>null);
+ if(!res.ok) throw new Error(data?.error || 'Une erreur est survenue. Réessayez.');
+ if(data===null) throw new Error('Le service de la boutique est indisponible.');
  return data;
 }
 const Context=createContext();
@@ -99,7 +100,10 @@ function App(){
  const [lang,setLang]=useState(()=>load('aguti-lang','fr')==='ar'?'ar':'fr');
  const [cart,setCart]=useState(()=>load('aguti-cart',[])),[cartOpen,setCartOpen]=useState(false),[quick,setQuick]=useState(null);
  const t=(fr,ar)=>lang==='ar'?ar:fr;
- useEffect(()=>{api('/catalog').then(setCatalog).catch(()=>setCatalogError('Le catalogue affiche les produits de démonstration. Actualisez pour réessayer.')).finally(()=>setLoading(false));},[]);
+ useEffect(()=>{api('/catalog').then(data=>{
+  if(!Array.isArray(data.products)||!Array.isArray(data.categories)||!data.store||!data.colors) throw new Error('Catalogue indisponible.');
+  setCatalog(data);
+ }).catch(()=>setCatalogError('Le catalogue affiche les produits de démonstration. Actualisez pour réessayer.')).finally(()=>setLoading(false));},[]);
  useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';localStorage.setItem('aguti-lang',JSON.stringify(lang));},[lang]);
  useEffect(()=>{localStorage.setItem('aguti-cart',JSON.stringify(cart));},[cart]);
  function add(p,color,size,qty){setCart(prev=>{const i=prev.findIndex(r=>r.id===p.id&&r.color===color&&r.size===size);return i<0?[...prev,{id:p.id,color,size,qty}]:prev.map((r,n)=>n===i?{...r,qty:Math.min(99,r.qty+qty)}:r);});setQuick(null);setCartOpen(true);}
