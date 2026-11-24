@@ -100,8 +100,7 @@ async function createOrder(db, body) {
   return json({ order, whatsapp: catalog.store.whatsapp }, 201);
 }
 
-async function uploadImage(bucket, image) {
-  if (!bucket) return error('Le stockage des images reste à configurer.', 503);
+async function uploadImage(db, image) {
   const match = /^data:image\/(png|jpeg|webp);base64,([a-zA-Z0-9+/=]+)$/.exec(image || '');
   if (!match) return error('Utilisez une image JPG, PNG ou WebP.');
   let raw;
@@ -109,7 +108,14 @@ async function uploadImage(bucket, image) {
   const valid = { png: raw.startsWith('\x89PNG\r\n\x1a\n'), jpeg: raw.startsWith('\xff\xd8\xff'), webp: raw.startsWith('RIFF') && raw.slice(8, 12) === 'WEBP' };
   if (!valid[match[1]] || raw.length > maxImageBytes) return error('Image invalide ou supérieure à 5 Mo.');
   const key = randomId(16) + '.' + match[1];
-  await bucket.put(key, Uint8Array.from(raw, char => char.charCodeAt(0)), { httpMetadata: { contentType: 'image/' + match[1] } });
+  // D1 limits the size of each row. Store bounded, aligned Base64 chunks.
+  const chunkSize = 256 * 1024;
+  const statements = [db.prepare('INSERT INTO images VALUES (?, ?)').bind(key, raw.length)];
+  const insertChunk = db.prepare('INSERT INTO image_chunks VALUES (?, ?, ?)');
+  for (let offset = 0; offset < match[2].length; offset += chunkSize) {
+    statements.push(insertChunk.bind(key, offset / chunkSize, match[2].slice(offset, offset + chunkSize)));
+  }
+  await db.batch(statements);
   return json({ path: '/uploads/' + key }, 201);
 }
 
@@ -190,7 +196,7 @@ async function handle(request, env) {
     const { catalog, savedCatalog } = await readCatalog(db);
     return json({ ...catalog, revision: await signature(secret, 'catalog:' + savedCatalog) });
   }
-  if (method === 'POST' && path === '/api/admin/image') return uploadImage(env.IMAGES, body.image);
+  if (method === 'POST' && path === '/api/admin/image') return uploadImage(db, body.image);
   const orderId = /^\/api\/admin\/orders\/([A-F0-9]{12})$/.exec(path)?.[1];
   if (method === 'PUT' && orderId) {
     if (!statuses.includes(body.status)) return error('Statut invalide.');

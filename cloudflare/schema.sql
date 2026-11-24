@@ -7,3 +7,13 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   expires INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS rate_limits_expires ON rate_limits(expires);
+CREATE TABLE IF NOT EXISTS images (
+  id TEXT PRIMARY KEY,
+  size INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS image_chunks (
+  image_id TEXT NOT NULL REFERENCES images(id) ON DELETE CASCADE,
+  position INTEGER NOT NULL,
+  content TEXT NOT NULL,
+  PRIMARY KEY (image_id, position)
+);
