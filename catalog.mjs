@@ -20,4 +20,4 @@ export const products = [
  product(7,'accessoires','Calot médical Ciel','قبعة طبية سماوية',79,'accessoires',['Bleu ciel','Bleu marine','Blanc'],'',['Unique']),
  product(8,'medical','Ensemble médical Sauge','طقم طبي أخضر',299,'sauge',['Vert sauge','Vert émeraude','Bleu marine']),
 ];
-export const store = {phone:'',whatsapp:'',address:'',city:'Maroc',email:'',instagram:'',facebook:''};
+export const store = {phone:'',whatsapp:'+212660392740',address:'',city:'Maroc',email:'',instagram:'',facebook:''};
