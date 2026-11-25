@@ -52,7 +52,7 @@
 .showroom-swatches button[aria-pressed=true]{box-shadow:0 0 0 2px #f5f4f0,0 0 0 4px #315e56}
 .showroom-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .showroom-actions small{color:var(--muted)}
-@supports(animation-timeline:view()){.showroom-editorial,.benefits{animation:editorial-reveal linear both;animation-timeline:view();animation-range:entry 0% entry 26%}.collection-portal img{translate:0 var(--portal-offset,0);animation:portal-parallax linear both;animation-timeline:view();animation-range:exit 0% exit 100%}}
+@supports(animation-timeline:view()){.showroom-editorial{animation:editorial-reveal linear both;animation-timeline:view();animation-range:entry 0% entry 26%}.collection-portal img{translate:0 var(--portal-offset,0);animation:portal-parallax linear both;animation-timeline:view();animation-range:exit 0% exit 100%}}
 @keyframes editorial-reveal{from{opacity:.45;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes portal-parallax{to{translate:0 18px}}
 @media(max-width:720px){
@@ -70,10 +70,38 @@
  .showroom-actions{position:fixed;z-index:4;bottom:0;inset-inline:0;padding:8px 13px max(8px,env(safe-area-inset-bottom));background:#fbfbf7;border-top:1px solid #dfe5e0}
  .showroom-actions>.button.dark{flex:1}
 }
-@media(prefers-reduced-motion:reduce){.stage-media>img,.collection-portal img,.showroom-editorial,.benefits{animation:none}}
-.benefits .quality-photo{height:clamp(145px,23vw,290px);object-position:center 42%;border-radius:10px;margin-bottom:14px}
+@media(prefers-reduced-motion:reduce){.stage-media>img,.collection-portal img,.showroom-editorial{animation:none}}
 .review-layout{display:grid;grid-template-columns:minmax(136px,1fr) minmax(0,2fr);gap:14px;align-items:stretch}
 .review-layout>img{height:100%;min-height:220px;max-height:340px;object-position:center 33%;border-radius:10px}
 .review-layout .reviews{align-content:center}
 @media(max-width:900px){.review-layout .reviews{grid-template-columns:1fr;gap:6px}}
 @media(max-width:600px){.review-layout{grid-template-columns:1fr}.review-layout>img{height:160px;min-height:0}}
+/* Editorial composition for the homepage. */
+.showroom-editorial{padding-block:clamp(48px,7vw,104px)}
+.showroom-editorial h2{max-width:16ch;margin-bottom:clamp(18px,3vw,38px)}
+.showroom-editorial .editorial-grid{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:clamp(12px,4vw,54px);align-items:start}
+.showroom-editorial .editorial-photo{min-height:clamp(275px,42vw,560px);border-radius:0}
+.showroom-editorial .editorial-photo:nth-child(2){min-height:clamp(240px,33vw,470px);margin-top:clamp(26px,7vw,100px);background:#ddd5ce}
+.showroom-editorial .editorial-photo div{padding:clamp(12px,2.6vw,32px);background:linear-gradient(0deg,#0c1b28ee,transparent)}
+.showroom-editorial .editorial-photo span{color:#e3eae8}
+.showroom-editorial .editorial-categories{margin-top:22px;padding-block:9px;border-block:1px solid var(--line)}
+.showroom-editorial .editorial-categories a{border:0;border-radius:0}
+.showroom-editorial .editorial-categories img{width:60px;height:40px}
+.editorial-about{border-radius:0;background:#142734;color:#f9f5ee;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
+.editorial-about img{height:100%;min-height:360px;object-position:center 30%}
+.editorial-about>div{gap:16px}
+.editorial-about :is(.eyebrow,.text-link){color:#9be7cf}
+.editorial-about p:not(.eyebrow){color:#d6e2e1}
+.editorial-reviews .review-layout{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(14px,5vw,70px)}
+.editorial-reviews .review-layout>img{height:100%;min-height:310px;max-height:none;border-radius:0;object-position:center 32%}
+.editorial-reviews .reviews{grid-template-columns:1fr;gap:0}
+.editorial-reviews .reviews article{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:14px 0}
+.editorial-reviews .reviews article:first-child{border-top:1px solid var(--line)}
+.footer-grid .footer-wa{color:#183d36;background:#a3ebd4;margin-block:5px}
+@media(max-width:700px){
+ .editorial-about,.editorial-reviews .review-layout{grid-template-columns:1fr}
+ .editorial-about img,.editorial-reviews .review-layout>img{min-height:0;height:230px}
+ .showroom-editorial .editorial-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .showroom-editorial .editorial-photo{min-height:250px}
+ .showroom-editorial .editorial-photo:nth-child(2){min-height:220px;margin-top:20px}
+}
