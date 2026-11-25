@@ -2,7 +2,7 @@
 @import "tailwindcss";
 :root{--ink:#142334;--muted:#586571;--line:#e3e8e6;--green:#266354;--mint:#9be7cf;--paper:#f6f8f7;--white:#fff;font-family:"DM Sans",Arial,sans-serif;color:var(--ink);background:white;scroll-behavior:smooth}
 [dir=rtl]{font-family:"Noto Sans Arabic",Arial,sans-serif}
-[dir=rtl] :is(h1,h2,h3,.brand){font-family:inherit;letter-spacing:0}
+[dir=rtl] :is(h1,h2,h3){font-family:inherit;letter-spacing:0}
 *{box-sizing:border-box}
 body{margin:0}
 button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
@@ -39,8 +39,9 @@ small{font-size:.84em}
 .announcement span{height:4px;width:4px;background:#91b5ac;border-radius:100%;flex:none}
 .header{background:#fff;position:relative;z-index:5;border-bottom:1px solid #e8edec}
 .header-inner{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-.brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:25px;line-height:.94;letter-spacing:.1em;width:max-content}
-.brand small{display:block;font-size:8px;letter-spacing:.25em;margin-top:5px;color:#617673}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:27px;line-height:.95;letter-spacing:-.055em;width:max-content}
+.brand-wordmark{display:grid;justify-items:start}
+.brand small{display:block;font-size:9px;line-height:1;letter-spacing:.27em;font-weight:700;margin-top:5px;color:#35675c}
 .brand-mark{display:grid;place-items:center;width:40px;height:40px;flex:none}
 .navigation,.header-actions{display:flex;align-items:center;gap:23px}
 .navigation a{font-size:13px;font-weight:700;white-space:nowrap;color:#44515e;transition:color .2s}

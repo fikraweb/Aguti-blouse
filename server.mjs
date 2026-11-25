@@ -172,7 +172,7 @@ if (dev) {
   const canonical=origin&&title&&path!=='/admin'?'<link rel="canonical" href="'+escape(origin+path)+'">':'';
   const robots=!title||path==='/admin'?'<meta name="robots" content="noindex">':'';
   const product=p?'<script type="application/ld+json">'+JSON.stringify({'@context':'https://schema.org','@type':'Product',name:p.name,image:p.images.map(img=>origin+img),description,offers:{'@type':'Offer',price:p.price,priceCurrency:'MAD'}}).replace(/</g,'\\u003c')+'</script>':'';
-  const page=html.replace(/<title>[^<]*<\/title>/,()=>'<title>'+escape(title||'Page introuvable')+' — Aguti Workwear</title>'+canonical+robots+product).replace(/(<meta name="description" content=")[^"]*(")/,(_,a,b)=>a+escape(description)+b);
+  const page=html.replace(/<title>[^<]*<\/title>/,()=>'<title>'+escape(title||'Page introuvable')+' — Aguti Blouse</title>'+canonical+robots+product).replace(/(<meta name="description" content=")[^"]*(")/,(_,a,b)=>a+escape(description)+b);
   res.status(title?200:404).type('html').send(page);
  });
 }
