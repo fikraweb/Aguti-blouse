@@ -22,7 +22,7 @@ const amount=value=>new Intl.NumberFormat('fr-MA',{maximumFractionDigits:2}).for
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)) ?? fallback;}catch{return fallback;}};
 const wa=(number,body)=>number?'https://wa.me/'+number.replace(/\D/g,'')+'?text='+encodeURIComponent(body):'/#contact';
 const ico=18;
-function Brand(){return <a href="/" className="brand" aria-label="Aguti, accueil"><span className="brand-mark"><img src="/images/aguti-monogram.webp" alt="" width="40" height="40"/></span><span>AGUTI<small>WORKWEAR</small></span></a>}
+function Brand(){return <a href="/" className="brand" aria-label="Aguti, accueil"><span className="brand-mark"><img src="/images/aguti-mark-modern.webp" alt="" width="40" height="40"/></span><span>AGUTI<small>WORKWEAR</small></span></a>}
 function SectionTitle({tag,title,description,action}){return <div className="section-heading"><div><p className="eyebrow">{tag}</p><h2>{title}</h2>{description&&<p className="muted">{description}</p>}</div>{action}</div>}
 function Whats({children,message='Bonjour Aguti, je souhaite en savoir plus sur vos tenues.',className='button',...props}){
  const {catalog}=useShop();

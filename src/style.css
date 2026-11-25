@@ -41,7 +41,7 @@ small{font-size:.84em}
 .header-inner{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:25px;line-height:.94;letter-spacing:.1em;width:max-content}
 .brand small{display:block;font-size:8px;letter-spacing:.25em;margin-top:5px;color:#617673}
-.brand-mark{background:#163d3e;color:#a3ead3;display:grid;place-items:center;width:40px;height:40px;border-radius:9px}
+.brand-mark{display:grid;place-items:center;width:40px;height:40px;flex:none}
 .navigation,.header-actions{display:flex;align-items:center;gap:23px}
 .navigation a{font-size:13px;font-weight:700;white-space:nowrap;color:#44515e;transition:color .2s}
 .navigation a:hover,.navigation .active{color:#277362}
@@ -205,8 +205,9 @@ body:has(dialog[open]){overflow:hidden}
  .hero-inner{padding-block:clamp(226px,65vw,370px) 32px}
  [dir=rtl] .hero-inner{justify-items:start;text-align:right}
 }
-.brand-mark{background:radial-gradient(circle at 31% 22%,#355d5b,#142e38 70%);box-shadow:inset 0 1px 1px #ffffff35,0 2px 6px #14233424}
-.brand-mark img{width:87%;height:87%;object-fit:contain}
+.brand-mark img{width:100%;height:100%;object-fit:contain}
+.footer-grid .brand-mark img{filter:brightness(0) saturate(100%) invert(87%) sepia(24%) saturate(578%) hue-rotate(92deg) brightness(102%)}
+footer .brand small{color:#b9d3cc}
 .campaign-hero{font-family:"Noto Sans Arabic",Arial,sans-serif}
 .campaign-hero .hero-inner{display:grid;justify-items:end;text-align:left}
 .campaign-hero h1{font-family:inherit;font-size:clamp(47px,7vw,107px);letter-spacing:0;line-height:1.24}
