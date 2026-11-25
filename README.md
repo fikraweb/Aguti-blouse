@@ -6,7 +6,7 @@ Boutique de vêtements professionnels au Maroc avec catalogue, panier, paiement 
 
 Utilisez Node.js 24 ou une version ultérieure. Depuis le dépôt existant, lancez `npm ci` puis `npm run dev`. Le serveur écoute par défaut sur le port 3000.
 
-Le catalogue initial présente deux coupes de la tenue médicale à col V, avec les onze couleurs de la photo fournie. Le prix initial de 299 MAD et les tailles XS à XXL sont modifiables dans l’administration. Les témoignages sont des exemples.
+La boutique propose un configurateur pour la tenue médicale à col V. Les clients choisissent une coupe femme ou homme, puis une couleur parmi les onze teintes de référence et leur taille. Les vues studio sont illustratives. Les détails et échantillons proviennent de la photo fournie. Le prix initial de 299 MAD et les tailles XS à XXL sont modifiables dans l’administration. Les témoignages sont des exemples.
 
 ## Administration et commandes
 

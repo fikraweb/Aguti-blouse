@@ -1,6 +1,6 @@
 import React,{useState,useEffect,createContext,useContext} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ArrowRight,ArrowUpRight,Search,ShoppingBag,Menu,X,Globe,MessageCircle,Truck,ShieldCheck,Shirt,Ruler,Headphones,Star,Plus,Minus,Eye,MapPin,Phone,Instagram,Facebook,Check,SlidersHorizontal,Mail} from 'lucide-react';
+import {ArrowRight,ArrowUpRight,ShoppingBag,Menu,X,Globe,MessageCircle,Truck,ShieldCheck,Shirt,Ruler,Headphones,Star,Plus,Minus,MapPin,Phone,Instagram,Facebook,Check,Mail} from 'lucide-react';
 import {products,categories,store,colors,uniformColors,referencePhoto} from '../catalog.mjs';
 import './style.css';
 
@@ -27,16 +27,11 @@ function Whats({children,message='Bonjour Aguti, je souhaite en savoir plus sur 
 }
 function Header(){
  const {t,lang,setLang,cart,setCartOpen}=useShop();
- const [menu,setMenu]=useState(false),[search,setSearch]=useState(false);
- const links=[['/','Accueil','الرئيسية'],['/boutique','Boutique','المتجر'],['/#categories','Catégories','الفئات'],['/#about','À propos','من نحن'],['/#contact','Contact','اتصل بنا']];
- return <><div className="announcement"><Truck size={15}/>{t('Livraison partout au Maroc','التوصيل في جميع أنحاء المغرب')}<span></span>{t('Paiement à la livraison','الدفع عند الاستلام')}</div><header className="header"><div className="container header-inner"><Brand/><nav className={menu?'navigation open':'navigation'} aria-label={t('Navigation principale','القائمة الرئيسية')}>{links.map(([url,fr,ar])=><a className={location.pathname===url?'active':''} key={fr} href={url} onClick={()=>setMenu(false)}>{t(fr,ar)}</a>)}</nav><div className="header-actions"><button aria-label={t('Rechercher','بحث')} className="icon" onClick={()=>setSearch(!search)}><Search size={20}/></button><button className="icon language" aria-label="Changer la langue / اللغة" onClick={()=>setLang(lang==='fr'?'ar':'fr')}><Globe size={17}/><span>{lang==='fr'?'FR':'AR'}</span></button><button aria-label={t('Panier','السلة')} className="icon cart-trigger" onClick={()=>setCartOpen(true)}><ShoppingBag size={20}/><b>{cart.reduce((s,p)=>s+p.qty,0)}</b></button><Whats className="button header-wa">WhatsApp</Whats><button className="icon menu-trigger" aria-label={t('Menu','القائمة')} onClick={()=>setMenu(!menu)}><Menu size={23}/></button></div></div>{search&&<form className="container search-bar" action="/boutique"><Search size={18}/><input name="q" autoFocus placeholder={t('Rechercher un produit…','ابحث عن منتج…')}/><button className="button dark">{t('Rechercher','بحث')}</button></form>}</header></>;
-}
-function CategoryCards(){
- const {catalog,t,lang}=useShop();
- return <section className="container section" id="categories"><SectionTitle tag={t('NOS UNIVERS','تشكيلاتنا')} title={t('Explorez nos catégories','اكتشف فئاتنا')} description={t('Des essentiels pensés pour chaque métier.','أساسيات مصممة لكل مهنة.')} action={<a className="text-link" href="/boutique">{t('Voir toutes les catégories','عرض كل الفئات')} <ArrowRight size={16}/></a>}/><div className="category-grid">{catalog.categories.map(c=><a className="category-card" href={'/boutique?categorie='+c.id} key={c.id}><img src={c.image} alt={c.name} loading="lazy"/><div><h3>{lang==='ar'?c.ar||c.name:c.name}</h3><span><ArrowUpRight size={17}/></span></div></a>)}</div></section>;
+ const [menu,setMenu]=useState(false);
+ const links=[['/','Accueil','الرئيسية'],['/boutique','Choisir ma tenue','اختار طقمك'],['/#about','À propos','من نحن'],['/#contact','Contact','اتصل بنا']];
+ return <><div className="announcement"><Truck size={15}/>{t('Livraison partout au Maroc','التوصيل في جميع أنحاء المغرب')}<span></span>{t('Paiement à la livraison','الدفع عند الاستلام')}</div><header className="header"><div className="container header-inner"><Brand/><nav className={menu?'navigation open':'navigation'} aria-label={t('Navigation principale','القائمة الرئيسية')}>{links.map(([url,fr,ar])=><a className={location.pathname===url?'active':''} key={fr} href={url} onClick={()=>setMenu(false)}>{t(fr,ar)}</a>)}</nav><div className="header-actions"><button className="icon language" aria-label="Changer la langue / اللغة" onClick={()=>setLang(lang==='fr'?'ar':'fr')}><Globe size={17}/><span>{lang==='fr'?'FR':'AR'}</span></button><button aria-label={t('Panier','السلة')} className="icon cart-trigger" onClick={()=>setCartOpen(true)}><ShoppingBag size={20}/><b>{cart.reduce((s,p)=>s+p.qty,0)}</b></button><Whats className="button header-wa">WhatsApp</Whats><button className="icon menu-trigger" aria-label={t('Menu','القائمة')} onClick={()=>setMenu(!menu)}><Menu size={23}/></button></div></div></header></>;
 }
 const styleCrops = {101:[352,143,168,294],102:[483,128,160,294]};
-const styleNames = {101:['Coupe femme','قصة نسائية'],102:['Coupe homme','قصة رجالية']};
 const fabricCenters = [104,256,369,474,589,699,800,891,997,1092,1196];
 
 const outfitPortraits = [
@@ -44,21 +39,6 @@ const outfitPortraits = [
  [551,130,102], [679,147,101], [772,130,102], [875,147,101],
  [974,116,102], [1092,140,101], [1185,119,102],
 ];
-
-function catalogueCards(items, selectedColor='') {
- const referenceItems=items.filter(p=>styleNames[p.id] && p.images[0]===referencePhoto);
- const cards=Object.keys(uniformColors).flatMap((color,index)=>{
-  if(selectedColor && color!==selectedColor) return [];
-  const matches=referenceItems.filter(p=>p.colors.includes(color));
-  const [x,y,style]=outfitPortraits[index];
-  const product=matches.find(p=>p.id===style)||matches[0];
-  return product?[{p:product,variant:color,crop:[x-69,y-3,138,251]}]:[];
- });
- for(const product of items) {
-  if(!referenceItems.includes(product) || product.colors.some(color=>!Object.hasOwn(uniformColors,color))) cards.push({p:product});
- }
- return cards;
-}
 
 function ReferenceCrop({crop,alt,className=''}) {
  const [left,top,width,height]=crop;
@@ -72,17 +52,10 @@ function ProductImage({p,alt}) {
  return crop?<ReferenceCrop crop={crop} alt={alt} className="uniform-photo"/>:<img loading="lazy" src={p.images[0]} alt={alt}/>;
 }
 
-function ProductCard({p,variant,crop}){
- const {setQuick,t,lang,catalog}=useShop();
- const [selected,setSelected]=useState(variant||p.colors[0]);
- const productUrl='/produit/'+p.id+(variant?'?couleur='+encodeURIComponent(variant):'');
- const title=variant?t('Ensemble médical · '+variant,'طقم طبي · '+variant):(lang==='ar'?p.ar||p.name:p.name);
- return <article className="product"><div className="product-photo"><a href={productUrl}>{crop?<ReferenceCrop crop={crop} alt={title} className="uniform-photo"/>:<ProductImage p={p} alt={title}/>}</a>{p.badge&&<span className="badge">{p.badge}</span>}<button aria-label={t('Aperçu rapide','معاينة سريعة')} className="quick icon" onClick={()=>setQuick({p,color:selected})}><Eye size={18}/></button></div><div className="product-info"><div className="product-line"><a href={productUrl}><h3>{title}</h3></a><strong>{amount(p.price)}</strong></div><div className="product-variants"><div className="swatches">{(variant?[variant]:p.colors).map(c=><button type="button" key={c} title={c} aria-label={c} aria-pressed={selected===c} onClick={()=>setSelected(c)} style={{'--swatch':catalog.colors[c]}}/>)}</div><span>{p.sizes.join(' · ')}</span></div><div className="product-buttons"><button className="button outline" onClick={()=>setQuick({p,color:selected})}><Plus size={16}/>{t('Ajouter au panier','أضف للسلة')}</button><button className="icon wa-icon" aria-label="WhatsApp" onClick={()=>setQuick({p,color:selected})}><MessageCircle size={18}/></button></div></div></article>;
-}
 const promises=[[ShieldCheck,'Qualité supérieure','جودة فائقة'],[Shirt,'Confort au quotidien','راحة يومية'],[Ruler,'Couleurs et tailles variées','ألوان ومقاسات متنوعة'],[Truck,'Livraison dans tout le Maroc','التوصيل في كل المغرب'],[Headphones,'Service client personnalisé','خدمة عملاء شخصية']];
 function Home(){
- const {t,catalog,loading,catalogError}=useShop();
- return <><section className="hero"><img className="hero-photo" src="/images/hero-campaign.webp" fetchPriority="high" alt=""/><div className="container hero-inner"><p className="eyebrow hero-tag"><span/>{t('L’EXIGENCE DU VÊTEMENT PROFESSIONNEL','ملابس مهنية بمعايير عالية')}</p><h1>{t('Des tenues professionnelles qui font la différence.','ملابس مهنية تصنع الفرق.')}</h1><p>{t('Découvrez notre collection de vêtements professionnels alliant confort, qualité et élégance.','اكتشف مجموعتنا من الملابس المهنية التي تجمع بين الراحة والجودة والأناقة.')}</p><div className="hero-actions"><a className="button mint" href="/boutique">{t('Découvrir la collection','اكتشف المجموعة')}<ArrowRight size={18}/></a><Whats className="button glass">{t('Commander sur WhatsApp','اطلب عبر واتساب')}</Whats></div></div></section><div className="service-strip"><div className="container service-inner">{[[Truck,'Livraison partout au Maroc','التوصيل في كل المغرب'],[ShieldCheck,'Paiement à la livraison','الدفع عند الاستلام'],[Shirt,'Qualité professionnelle','جودة مهنية'],[Headphones,'Service client à votre écoute','خدمة عملاء في الاستماع']].map(([Icon,fr,ar])=><span key={fr}><Icon size={20}/>{t(fr,ar)}</span>)}</div></div><CategoryCards/><section className="featured"><div className="container section"><SectionTitle tag={t('LA SÉLECTION AGUTI','اختيارات أغوتي')} title={t('Les favoris du moment','المفضلة الآن')} description={t('Des tenues qui vous accompagnent, jour après jour.','ملابس ترافقك يوماً بعد يوم.')} action={<a className="text-link" href="/boutique">{t('Toute la boutique','كل المتجر')}<ArrowRight size={17}/></a>}/>{loading&&<p role="status">{t('Chargement du catalogue…','جاري تحميل الكتالوج…')}</p>}{catalogError&&<p className="error" role="alert">{catalogError}</p>}<div className="product-grid">{catalogueCards(catalog.products).slice(0,4).map(card=><ProductCard {...card} key={card.variant||card.p.id}/>)}</div></div></section><section className="container section benefits"><SectionTitle tag={t('NOTRE ENGAGEMENT','التزامنا')} title={t('Pensé pour votre quotidien','مصمم ليومك المهني')}/><div className="benefit-grid">{promises.map(([Icon,fr,ar])=><div key={fr}><Icon size={27}/><h3>{t(fr,ar)}</h3></div>)}</div></section><section className="container about" id="about"><img src="/images/about.webp" alt="Atelier Aguti" loading="lazy"/><div><p className="eyebrow">{t('À PROPOS D’AGUTI','عن أغوتي')}</p><h2>{t('Le style au service de votre métier.','الأناقة في خدمة مهنتك.')}</h2><p>{t('Aguti est votre spécialiste marocain du vêtement professionnel. Nous sélectionnons des coupes, des matières et des couleurs adaptées aux journées de celles et ceux qui font la différence sur le terrain.','أغوتي متخصصة في الملابس المهنية بالمغرب. نختار القصات والأقمشة والألوان لتناسب يومك في العمل.')}</p><a className="text-link" href="/boutique">{t('Découvrir nos tenues','اكتشف ملابسنا')}<ArrowRight size={18}/></a></div></section><section className="container section"><SectionTitle tag={t('TÉMOIGNAGES','آراء العملاء')} title={t('Les tenues au quotidien','الملابس في يوم العمل')} description={t('Exemples de retours clients.','أمثلة على آراء العملاء.')}/><div className="reviews">{[['« Une coupe confortable même après une longue garde. »','Personnel soignant'],['« La blouse est bien coupée et facile à entretenir. »','Cabinet médical'],['« Toute notre équipe a pu trouver sa taille. »','Équipe technique']].map(([quote,author])=><article key={author}><div aria-label="5 étoiles">{Array.from({length:5},(_,i)=><Star size={15} key={i} fill="currentColor"/>)}</div><p>{quote}</p><small>{author}</small></article>)}</div></section><Contact/></>;
+ const {t}=useShop();
+ return <><section className="hero"><img className="hero-photo" src="/images/hero-campaign.webp" fetchPriority="high" alt=""/><div className="container hero-inner"><p className="eyebrow hero-tag"><span/>{t('L’EXIGENCE DU VÊTEMENT PROFESSIONNEL','ملابس مهنية بمعايير عالية')}</p><h1>{t('Des tenues professionnelles qui font la différence.','ملابس مهنية تصنع الفرق.')}</h1><p>{t('Découvrez notre collection de vêtements professionnels alliant confort, qualité et élégance.','اكتشف مجموعتنا من الملابس المهنية التي تجمع بين الراحة والجودة والأناقة.')}</p><div className="hero-actions"><a className="button mint" href="/boutique">{t('Choisir ma tenue','اختار طقمك')}<ArrowRight size={18}/></a><Whats className="button glass">{t('Commander sur WhatsApp','اطلب عبر واتساب')}</Whats></div></div></section><div className="service-strip"><div className="container service-inner">{[[Truck,'Livraison partout au Maroc','التوصيل في كل المغرب'],[ShieldCheck,'Paiement à la livraison','الدفع عند الاستلام'],[Shirt,'Qualité professionnelle','جودة مهنية'],[Headphones,'Service client à votre écoute','خدمة عملاء في الاستماع']].map(([Icon,fr,ar])=><span key={fr}><Icon size={20}/>{t(fr,ar)}</span>)}</div></div><Configurator home/><section className="container section benefits"><SectionTitle tag={t('NOTRE ENGAGEMENT','التزامنا')} title={t('Pensé pour votre quotidien','مصمم ليومك المهني')}/><div className="benefit-grid">{promises.map(([Icon,fr,ar])=><div key={fr}><Icon size={27}/><h3>{t(fr,ar)}</h3></div>)}</div></section><section className="container about" id="about"><img src="/images/about.webp" alt="Atelier Aguti" loading="lazy"/><div><p className="eyebrow">{t('À PROPOS D’AGUTI','عن أغوتي')}</p><h2>{t('Le style au service de votre métier.','الأناقة في خدمة مهنتك.')}</h2><p>{t('Aguti est votre spécialiste marocain du vêtement professionnel. Nous sélectionnons des coupes, des matières et des couleurs adaptées aux journées de celles et ceux qui font la différence sur le terrain.','أغوتي متخصصة في الملابس المهنية بالمغرب. نختار القصات والأقمشة والألوان لتناسب يومك في العمل.')}</p><a className="text-link" href="/boutique">{t('Découvrir nos tenues','اكتشف ملابسنا')}<ArrowRight size={18}/></a></div></section><section className="container section"><SectionTitle tag={t('TÉMOIGNAGES','آراء العملاء')} title={t('Les tenues au quotidien','الملابس في يوم العمل')} description={t('Exemples de retours clients.','أمثلة على آراء العملاء.')}/><div className="reviews">{[['« Une coupe confortable même après une longue garde. »','Personnel soignant'],['« La blouse est bien coupée et facile à entretenir. »','Cabinet médical'],['« Toute notre équipe a pu trouver sa taille. »','Équipe technique']].map(([quote,author])=><article key={author}><div aria-label="5 étoiles">{Array.from({length:5},(_,i)=><Star size={15} key={i} fill="currentColor"/>)}</div><p>{quote}</p><small>{author}</small></article>)}</div></section><Contact/></>;
 }
 function Contact(){
  const {catalog,t}=useShop();
@@ -90,50 +63,64 @@ function Contact(){
  async function submit(e){e.preventDefault();const form=e.currentTarget;setBusy(true);setStatus(null);try{await api('/contact','POST',Object.fromEntries(new FormData(form))); form.reset();setStatus({ok:true,text:t('Message envoyé.','تم إرسال الرسالة.')});}catch(error){setStatus({text:error.message});}finally{setBusy(false);}}
  return <section className="contact" id="contact"><div className="container section"><SectionTitle tag={t('CONTACT','اتصل بنا')} title={t('Parlons de vos besoins','لنتحدث عن احتياجاتك')}/><div className="contact-grid"><div><div className="contact-line"><Phone size={19}/>{catalog.store.phone?<a href={'tel:'+catalog.store.phone}>{catalog.store.phone}</a>:t('Téléphone à renseigner','رقم الهاتف غير متاح')}</div><div className="contact-line"><MapPin size={19}/>{catalog.store.address||catalog.store.city||'Maroc'}</div>{catalog.store.whatsapp&&<Whats className="button outline">WhatsApp</Whats>}<div className="map"><MapPin size={24}/>{catalog.store.address?<a href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(catalog.store.address+' '+catalog.store.city)} target="_blank" rel="noreferrer">Google Maps <ArrowUpRight size={16}/></a>:<span>Google Maps · {t('Adresse à renseigner','العنوان غير متاح')}</span>}</div></div><form className="stack" onSubmit={submit}><label>{t('Nom','الاسم')}<input name="name" required maxLength={100}/></label><label>{t('E-mail','البريد الإلكتروني')}<input name="email" type="email" required maxLength={150}/></label><label>{t('Message','الرسالة')}<textarea name="message" rows={4} required maxLength={2000}/></label><button className="button dark" disabled={busy}>{busy?t('Envoi…','جاري الإرسال…'):t('Envoyer le message','أرسل الرسالة')}</button>{status&&<p role="status" className={status.ok?'success':'error'}>{status.text}</p>}</form></div></div></section>;
 }
-function Shop(){
- const {t,catalog,loading,catalogError,lang}=useShop();
- const query=new URLSearchParams(location.search);
- const [q,setQ]=useState(query.get('q')||''),[category,setCategory]=useState(query.get('categorie')||''),[color,setColor]=useState(''),[size,setSize]=useState(''),[price,setPrice]=useState(''),[sort,setSort]=useState('popular'),[filters,setFilters]=useState(false);
- const sizes=[...new Set(catalog.products.flatMap(p=>p.sizes))];
- const availableColors=[...new Set(catalog.products.flatMap(p=>p.colors))];
- const normalized=value=>(value||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
- const results=catalog.products.filter(p=>(!q||normalized([p.name,p.ar,p.description,...p.colors].join(' ')).includes(normalized(q.trim())))&&(!category||p.category===category)&&(!color||p.colors.includes(color))&&(!size||p.sizes.includes(size))&&(!price||p.price<=Number(price))).sort((a,b)=>sort==='low'?a.price-b.price:sort==='high'?b.price-a.price:(b.popularity||0)-(a.popularity||0));
- const cards=catalogueCards(results,color).filter(({p,variant})=>!q || !variant || normalized([p.name,p.ar,p.description,variant].join(' ')).includes(normalized(q.trim())));
- if(sort!=='popular') cards.sort((a,b)=>sort==='low'?a.p.price-b.p.price:b.p.price-a.p.price);
- function reset(){setQ('');setCategory('');setColor('');setSize('');setPrice('');setSort('popular');}
- return <div className="container section shop"><SectionTitle tag={t('LA COLLECTION','المجموعة')} title={t('Boutique','المتجر')} description={t('Trouvez la tenue adaptée à votre métier.','اعثر على الزي المناسب لمهنتك.')}/><div className="shop-toolbar"><label className="search-control"><Search size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder={t('Rechercher un produit…','ابحث عن منتج…')}/></label><button className="button outline" onClick={()=>setFilters(!filters)} aria-expanded={filters}><SlidersHorizontal size={17}/>{t('Filtres','الفلاتر')}</button><select value={sort} onChange={e=>setSort(e.target.value)} aria-label={t('Trier','الترتيب')}><option value="popular">{t('Popularité','الأكثر شيوعاً')}</option><option value="low">{t('Prix croissant','السعر تصاعدياً')}</option><option value="high">{t('Prix décroissant','السعر تنازلياً')}</option></select></div>{filters&&<div className="filters"><label>{t('Catégorie','الفئة')}<select value={category} onChange={e=>setCategory(e.target.value)}><option value="">{t('Toutes','الكل')}</option>{catalog.categories.map(c=><option value={c.id} key={c.id}>{lang==='ar'?c.ar||c.name:c.name}</option>)}</select></label><label>{t('Couleur','اللون')}<select value={color} onChange={e=>setColor(e.target.value)}><option value="">{t('Toutes','الكل')}</option>{availableColors.map(c=><option key={c}>{c}</option>)}</select></label><label>{t('Taille','المقاس')}<select value={size} onChange={e=>setSize(e.target.value)}><option value="">{t('Toutes','الكل')}</option>{sizes.map(s=><option key={s}>{s}</option>)}</select></label><label>{t('Prix max (MAD)','السعر الأقصى (درهم)')}<input type="number" min="0" value={price} onChange={e=>setPrice(e.target.value)}/></label><button className="button outline" onClick={reset}>{t('Réinitialiser','إعادة ضبط')}</button></div>}<p className="muted" aria-live="polite">{loading?t('Chargement…','جاري التحميل…'):`${cards.length} ${t('produit(s)','منتج')}`}</p>{catalogError&&<p className="error">{catalogError}</p>}{!cards.length&&!loading&&<div className="empty"><ShoppingBag/><p>{t('Aucun produit ne correspond à votre recherche.','لا توجد منتجات مطابقة.')}</p><button className="button outline" onClick={reset}>{t('Effacer les filtres','مسح الفلاتر')}</button></div>}<div className="product-grid">{cards.map(card=><ProductCard {...card} key={card.variant||card.p.id}/>)}</div></div>;
-}
 function Quantity({qty,onChange,max=99}){return <div className="quantity"><button type="button" aria-label="−" disabled={qty<=1} onClick={()=>onChange(qty-1)}><Minus size={16}/></button><output>{qty}</output><button type="button" aria-label="+" disabled={qty>=max} onClick={()=>onChange(qty+1)}><Plus size={16}/></button></div>}
-function Detail({p:initialProduct,initialColor,modal=false}){
- const {t,lang,catalog,add}=useShop();
- const [productId,setProductId]=useState(initialProduct.id);
- const p=catalog.products.find(item=>item.id===productId)||initialProduct;
- const [requestedColor,setColor]=useState(p.colors.includes(initialColor)?initialColor:p.colors[0]),[requestedSize,setSize]=useState(''),[photo,setPhoto]=useState(0);
- const color=p.colors.includes(requestedColor)?requestedColor:p.colors[0];
- const size=p.sizes.includes(requestedSize)?requestedSize:'';
- const styleOptions=styleNames[p.id]?catalog.products.filter(item=>styleNames[item.id]):[];
+function Configurator({initialProduct,initialColor,home=false}){
+ const {t,catalog,add,loading}=useShop();
+ const options=[101,102].map(id=>catalog.products.find(item=>item.id===id)).filter(Boolean);
+ const [productId,setProductId]=useState(initialProduct?.id);
+ const [requestedColor,setColor]=useState(initialColor||'');
+ const [requestedSize,setSize]=useState('');
+ const [view,setView]=useState('studio');
+ const p=options.find(item=>item.id===productId);
+ const color=p?.colors.includes(requestedColor)?requestedColor:'';
+ const size=p?.sizes.includes(requestedSize)?requestedSize:'';
  const fabricIndex=Object.keys(uniformColors).indexOf(color);
- const showFabric=p.images[0]===referencePhoto && fabricIndex>=0;
- const portrait=showFabric?outfitPortraits[fabricIndex]:null;
- const message=`Bonjour Aguti, je souhaite commander ${p.name}, couleur ${color}, taille ${size}. Total : ${amount(p.price)}.`;
+ const [portraitX,portraitY,portraitStyle]=outfitPortraits[fabricIndex]||[];
+ const matches=Boolean(p && portraitStyle===p.id);
+ const styleCrop=styleCrops[p?.id||101];
+ const fit=matches?[portraitX-69,portraitY-3,138,251]:styleCrop;
+ const detail=matches?[portraitX-59,portraitY+98,115,212]:[styleCrop[0]+14,styleCrop[1]+91,120,212];
+ const studio=p?.id===102?'homme':'femme';
+ const title=t('Composez votre tenue médicale','اختار طقمك الطبي');
+ const Title=home?'h2':'h1';
+ const photoViews=[
+  ['studio',t('Vue studio','صورة استوديو')],
+  ['model',t('Photo du modèle','صورة الموديل')],
+  ['detail',t('Détail du haut','تفاصيل القميجة')],
+ ];
+ if(fabricIndex>=0) photoViews.push(['fabric',t('Couleur du tissu','لون القماش')]);
+ const message=p?`Bonjour Aguti, je souhaite commander ${p.name}, couleur ${color}, taille ${size}. Total : ${amount(p.price)}.`:'';
 
- return <article className={'detail '+(modal?'detail-modal':'')}>
-  <div className="gallery"><div className="gallery-main">{photo>0?<img src={p.images[photo]} alt={p.name}/>:portrait?.[2]===p.id?<ReferenceCrop crop={[portrait[0]-69,portrait[1]-3,138,251]} alt={p.name+' · '+color} className="uniform-photo"/>:<ProductImage p={p} alt={p.name}/>}</div>
-   {p.images.length>1&&<div className="gallery-thumbnails">{p.images.map((im,i)=><button key={im} onClick={()=>setPhoto(i)} aria-pressed={photo===i} aria-label={'Photo '+(i+1)}><img src={im} alt=""/></button>)}</div>}
+ return <section className="config-section" id="categories">
+  <div className="container section">
+   <div className="config-heading">
+    <p className="eyebrow">{t('LE VESTIAIRE MÉDICAL AGUTI','اللباس الطبي ديال أغوتي')}</p>
+    <Title>{title}</Title>
+   </div>
+   <div className="config-grid">
+    <figure className="config-gallery">
+     <div className={'config-photo config-view-'+view} key={view+studio+color}>
+      {view==='studio'?<img src={'/images/scrubs-studio-'+studio+'.webp'} alt={t('Illustration studio du haut à col V et du pantalon assorti','صورة توضيحية للطقم الطبي')}/>:<ReferenceCrop crop={view==='detail'?detail:view==='fabric'&&fabricIndex>=0?[fabricCenters[fabricIndex]-34,801,68,120]:fit} alt={view==='fabric'?color:t('Détail de la photo de référence','تفاصيل الصورة الأصلية')}/>}
+     </div>
+     <figcaption>{view==='studio'?t('Visuel studio illustratif','صورة استوديو توضيحية'):t('Extrait de la photo de référence','مقتطف من الصورة الأصلية')}</figcaption>
+     <div className="config-thumbnails">{photoViews.map(([id,label])=><button key={id} type="button" aria-pressed={view===id} onClick={()=>setView(id)}>{label}</button>)}</div>
+    </figure>
+    <div className="config-options">
+     <div><h3>{t('Ensemble à col V','طقم بياقة V')}</h3><p className="muted">{t('Haut à poches et pantalon assorti.','قميجة بجيوب وسروال بنفس اللون.')}</p></div>
+     <fieldset><legend>{t('1. Choisissez la coupe','1. اختار القصّة')}</legend>
+      <div className="config-styles">{options.map(item=><button key={item.id} type="button" aria-pressed={item.id===p?.id} onClick={()=>{setProductId(item.id);setColor('');setSize('');setView('studio');}}>{item.id===101?t('Femme','نساء'):t('Homme','رجال')}</button>)}</div>
+      {!options.length&&<p role="status">{loading?t('Chargement…','جاري التحميل…'):t('Ce modèle est momentanément indisponible.','هاد الموديل ما متوفرش دابا.')}</p>}
+     </fieldset>
+     {p&&<>
+      <fieldset><legend>{t('2. Choisissez la couleur','2. اختار اللون')}</legend><div className="config-colors">{p.colors.map(c=><button key={c} type="button" aria-pressed={c===color} onClick={()=>{setColor(c);setView(uniformColors[c]?'fabric':'studio');}}><i style={{background:catalog.colors[c]}}/>{c}</button>)}</div></fieldset>
+      <fieldset><legend>{t('3. Choisissez la taille','3. اختار المقاس')}</legend><div className="size-options">{p.sizes.map(s=><button type="button" aria-pressed={s===size} key={s} onClick={()=>setSize(s)}>{s}</button>)}</div></fieldset>
+      <strong className="detail-price">{amount(p.price)}</strong>
+      <div className="config-actions"><button className="button dark" disabled={!size||!color} onClick={()=>add(p,color,size,1)}><ShoppingBag size={18}/>{t('Ajouter au panier','أضف للسلة')}</button>{size&&color&&<Whats className="button outline" message={message}>{t('Commander sur WhatsApp','اطلب عبر واتساب')}</Whats>}</div>
+     </>}
+    </div>
+   </div>
   </div>
-  <div className="detail-info">
-   <h1>{lang==='ar'?p.ar||p.name:p.name}</h1>
-   <strong className="detail-price">{amount(p.price)}</strong>
-   <p className="muted">{p.description}</p>
-   {styleOptions.length>1&&<div className="variant"><strong>{t('Style','القصة')}</strong><div className="size-options">{styleOptions.map(item=><button key={item.id} aria-pressed={item.id===p.id} onClick={()=>{setProductId(item.id);setPhoto(0);}}>{t(...styleNames[item.id])}</button>)}</div></div>}
-   <div className="variant"><strong>{t('Taille','المقاس')}</strong><div className="size-options">{p.sizes.map(s=><button aria-pressed={s===size} key={s} onClick={()=>setSize(s)}>{s}</button>)}</div></div>
-   <div className="variant"><strong>{t('Couleur','اللون')}</strong> · {color}<div className="swatches large">{p.colors.map(c=><button key={c} title={c} aria-label={c} aria-pressed={c===color} style={{'--swatch':catalog.colors[c]}} onClick={()=>setColor(c)}/>)}</div></div>
-   {showFabric&&<div className="fabric-preview"><ReferenceCrop crop={[fabricCenters[fabricIndex]-34,801,68,120]} alt={color}/><span>{t('Aperçu du tissu','معاينة القماش')} · {color}</span></div>}
-   <button className="button dark" disabled={!size} onClick={()=>add(p,color,size,1)}><ShoppingBag size={18}/>{t('Ajouter au panier','أضف للسلة')}</button>
-   {size?<Whats className="button outline" message={message}>{t('Commander sur WhatsApp','اطلب عبر واتساب')}</Whats>:<p className="muted">{t('Choisissez une taille pour commander.','اختار المقاس باش تطلب.')}</p>}
-   <p className="detail-delivery"><Truck size={18}/>{t('Livraison au Maroc · Paiement à la livraison','التوصيل في المغرب · الدفع عند الاستلام')}</p>
-  </div>
- </article>;
+ </section>;
 }
 function Modal({children,close,label,drawer=false}){
  const node=React.useRef(null);
@@ -166,7 +153,7 @@ function App(){
  const [catalog,setCatalog]=useState({products,categories,store,colors,uniformColors,referencePhoto});
  const [catalogError,setCatalogError]=useState(''),[loading,setLoading]=useState(true);
  const [lang,setLang]=useState(()=>load('aguti-lang','fr')==='ar'?'ar':'fr');
- const [cart,setCart]=useState(()=>load('aguti-cart',[])),[cartOpen,setCartOpen]=useState(false),[quick,setQuick]=useState(null);
+ const [cart,setCart]=useState(()=>load('aguti-cart',[])),[cartOpen,setCartOpen]=useState(false);
  const t=(fr,ar)=>lang==='ar'?ar:fr;
  useEffect(()=>{api('/catalog').then(data=>{
   if(!Array.isArray(data.products)||!Array.isArray(data.categories)||!data.store||!data.colors) throw new Error('Catalogue indisponible.');
@@ -174,10 +161,10 @@ function App(){
  }).catch(()=>setCatalogError('Le catalogue affiche les produits de démonstration. Actualisez pour réessayer.')).finally(()=>setLoading(false));},[]);
  useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';localStorage.setItem('aguti-lang',JSON.stringify(lang));},[lang]);
  useEffect(()=>{localStorage.setItem('aguti-cart',JSON.stringify(cart));},[cart]);
- function add(p,color,size,qty){setCart(prev=>{const i=prev.findIndex(r=>r.id===p.id&&r.color===color&&r.size===size);return i<0?[...prev,{id:p.id,color,size,qty}]:prev.map((r,n)=>n===i?{...r,qty:Math.min(99,r.qty+qty)}:r);});setQuick(null);setCartOpen(true);}
+ function add(p,color,size,qty){setCart(prev=>{const i=prev.findIndex(r=>r.id===p.id&&r.color===color&&r.size===size);return i<0?[...prev,{id:p.id,color,size,qty}]:prev.map((r,n)=>n===i?{...r,qty:Math.min(99,r.qty+qty)}:r);});setCartOpen(true);}
  const path=location.pathname.replace(/\/$/,'')||'/';
  const p=path.startsWith('/produit/')?catalog.products.find(p=>p.id===Number(path.split('/')[2])):null;
  useEffect(()=>{const title=p?.name||({'/boutique':'Boutique','/mentions':'Mentions légales','/admin':'Administration'}[path]);document.title=title?title+' — Aguti Workwear':'Aguti — Tenues professionnelles au Maroc';},[p,path]);
- return <Context.Provider value={{catalog,t,lang,setLang,loading,catalogError,cart,setCart,setCartOpen,setQuick,add}}><Header/><main id="main">{path==='/'?<Home/>:path==='/boutique'?<Shop/>:path==='/admin'?<React.Suspense fallback={<p className="container section" role="status">Chargement…</p>}><Admin api={api}/></React.Suspense>:path==='/mentions'?<Legal/>:p?<div className="container section"><a className="text-link back" href="/boutique">← {t('Retour à la boutique','العودة إلى المتجر')}</a><Detail key={p.id} p={p} initialColor={new URLSearchParams(location.search).get('couleur')}/></div>:loading?<p className="container section" role="status">{t('Chargement…','جاري التحميل…')}</p>:<section className="container section empty"><h1>{t('Page introuvable','الصفحة غير موجودة')}</h1><a href="/boutique" className="button dark">{t('Voir la boutique','عرض المتجر')}</a></section>}</main><Footer/>{quick&&<Modal label={quick.p.name} close={()=>setQuick(null)}><Detail p={quick.p} initialColor={quick.color} modal/></Modal>}{cartOpen&&<Cart/>}</Context.Provider>;
+ return <Context.Provider value={{catalog,t,lang,setLang,loading,catalogError,cart,setCart,setCartOpen,add}}><Header/><main id="main">{path==='/'?<Home/>:path==='/boutique'?<Configurator/>:path==='/admin'?<React.Suspense fallback={<p className="container section" role="status">Chargement…</p>}><Admin api={api}/></React.Suspense>:path==='/mentions'?<Legal/>:p?<Configurator initialProduct={p} initialColor={new URLSearchParams(location.search).get('couleur')}/>:loading?<p className="container section" role="status">{t('Chargement…','جاري التحميل…')}</p>:<section className="container section empty"><h1>{t('Page introuvable','الصفحة غير موجودة')}</h1><a href="/boutique" className="button dark">{t('Voir la boutique','عرض المتجر')}</a></section>}</main><Footer/>{cartOpen&&<Cart/>}</Context.Provider>;
 }
 createRoot(document.getElementById('root')).render(<App/>);
