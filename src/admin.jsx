@@ -39,10 +39,10 @@ function GalleryManager({product,api,onChange,onError}){
 export function Admin({api}){
  const [data,setData]=useState(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[ok,setOk]=useState('');
  const [tab,setTab]=useState('Produits'),[selected,setSelected]=useState(null);
- useEffect(()=>{api('/admin').then(setData).catch(()=>{}).finally(()=>setLoading(false));},[api]);
+ useEffect(()=>{api('/admin').then(setData).catch(err=>{if(err.status!==401)setError(err.message);}).finally(()=>setLoading(false));},[api]);
  async function run(action,notice=''){
   setBusy(true);setError('');setOk('');
-  try{await action();setOk(notice);}catch(err){setError(err.message);}finally{setBusy(false);}
+  try{await action();setOk(notice);}catch(err){if(err.status===401&&data)setData(null);setError(err.message);}finally{setBusy(false);}
  }
  async function saveCatalog(products,categories){
   const catalog=await api('/admin/catalog','PUT',{products,categories,revision:data.revision});

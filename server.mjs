@@ -1,4 +1,4 @@
-import { collectionLabels, validShowroom, stockRequirements, insertOrderSql, updateOrderSql } from './showroom.mjs';
+import { collectionLabels, validShowroom, stockRequirements, insertOrderSql, updateOrderSql, sameOrder, stockUsageSql, withRemainingStock } from './showroom.mjs';
 import express from 'express';
 import { createServer as createHttpServer } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
@@ -44,7 +44,12 @@ app.use('/api',(req,res,next) => {
  next();
 });
 app.use('/uploads',express.static(join(dataPath,'uploads'),{maxAge:'7d',setHeaders:res=>res.set('X-Content-Type-Options','nosniff')}));
-app.get('/api/catalog',(_req,res)=>res.json(getCatalog()));
+app.get('/api/catalog',(_req,res)=>{
+ const catalog=getCatalog();
+ const tracked=catalog.products.filter(product=>product.stock!=null).map(product=>product.id);
+ const usage=tracked.length?db.prepare(stockUsageSql).all(JSON.stringify(tracked)):[];
+ res.json({...catalog,products:withRemainingStock(catalog.products,usage),checkoutAvailable:true});
+});
 const limits = new Map();
 function limit(scope,max,ms) {
  return (req,res,next) => {
@@ -74,13 +79,21 @@ app.post('/api/orders',limit('order',15,60000),(req,res)=>{
  if (!Array.isArray(source) || !source.length || source.length>50) return res.status(400).json({error:'Panier invalide.'});
  const catalog=getCatalog();
  if (!/^\+?\d{8,15}$/.test(catalog.store.whatsapp)) return res.status(503).json({error:'Le numéro WhatsApp de la boutique reste à configurer.'});
+ const requestedId=req.body.requestId;
+ if(requestedId!==undefined&&(typeof requestedId!=='string'||!/^[A-F0-9]{32}$/.test(requestedId))) return res.status(400).json({error:'Identifiant de commande invalide.'});
+ const id=requestedId||randomBytes(6).toString('hex').toUpperCase();
+ const previous=requestedId&&db.prepare('SELECT value FROM orders WHERE id=?').get(id);
+ if(previous){
+  const order=JSON.parse(previous.value);
+  if(!sameOrder(order,customer,source)) return res.status(409).json({error:'Cette commande a déjà été enregistrée avec d’autres informations.'});
+  return res.json({order,whatsapp:catalog.store.whatsapp});
+ }
  const items=[];
  for (const row of source) {
   const p=catalog.products.find(p=>p.id===row?.id);
   if (!p || p.active===false || !p.colors.includes(row.color) || !p.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty<1 || row.qty>99) return res.status(400).json({error:'Un article ou une variante du panier a changé.'});
   items.push({id:p.id,name:p.name,gender:collectionLabels[p.gender], deliveryIncluded:p.deliveryIncluded===true,price:p.price,color:row.color,size:row.size,qty:row.qty});
  }
- const id=randomBytes(6).toString('hex').toUpperCase();
  const order={id,customer,items,status:'En attente WhatsApp',createdAt:new Date().toISOString(),total:items.reduce((sum,row)=>sum+Math.round(row.price*100)*row.qty,0)/100};
  const result=db.prepare(insertOrderSql).run(id,JSON.stringify(order),JSON.stringify(stockRequirements(items,catalog.products)));
  if (!result.changes) return res.status(409).json({error:'Stock insuffisant. Vérifiez les quantités du panier.'});

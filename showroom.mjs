@@ -42,5 +42,26 @@ const stockCheckSql = `NOT EXISTS (
   ), 0)
  )`;
 
-export const insertOrderSql = 'INSERT INTO orders (id, value) SELECT ?, ? WHERE ' + stockCheckSql;
+export const insertOrderSql = 'INSERT OR IGNORE INTO orders (id, value) SELECT ?, ? WHERE ' + stockCheckSql;
 export const updateOrderSql = 'UPDATE orders SET value = ? WHERE id = ? AND value = ? AND ' + stockCheckSql;
+
+// Match the normalized delivery details and cart before replaying an order.
+export function sameOrder(order,customer,items) {
+ return Object.keys(customer).every(key=>order.customer[key]===customer[key])
+  &&order.items.length===items.length
+  &&order.items.every((previous,index)=>['id','color','size','qty'].every(key=>previous[key]===items[index]?.[key]));
+}
+
+export const stockUsageSql = `SELECT json_extract(item.value, '$.id') AS id,
+ SUM(json_extract(item.value, '$.qty')) AS quantity
+ FROM orders AS existing, json_each(existing.value, '$.items') AS item
+ WHERE json_extract(existing.value, '$.status') != 'Annulée'
+   AND json_extract(item.value, '$.id') IN (SELECT value FROM json_each(?))
+ GROUP BY json_extract(item.value, '$.id')`;
+
+export function withRemainingStock(products,usage) {
+ const used=new Map(usage.map(row=>[row.id,row.quantity]));
+ return products.map(product=>product.stock==null?product:{
+  ...product,availableStock:Math.max(0,product.stock-(used.get(product.id)||0))
+ });
+}

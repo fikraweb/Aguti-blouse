@@ -1,4 +1,4 @@
-import { collectionLabels, validShowroom, stockRequirements, insertOrderSql, updateOrderSql } from '../../showroom.mjs';
+import { collectionLabels, validShowroom, stockRequirements, insertOrderSql, updateOrderSql, sameOrder, stockUsageSql, withRemainingStock } from '../../showroom.mjs';
 import { products, categories, colors, store, withShowroomDefaults } from '../../catalog.mjs';
 
 const initialCatalog = { products, categories };
@@ -90,17 +90,29 @@ async function createOrder(db, body) {
   if (!Array.isArray(body.items) || !body.items.length || body.items.length > 50) return error('Panier invalide.');
   const { catalog } = await readCatalog(db);
   if (!/^\+?\d{8,15}$/.test(catalog.store.whatsapp)) return error('Le numéro WhatsApp de la boutique reste à configurer.', 503);
+  const requestedId=body.requestId;
+  if(requestedId!==undefined&&(typeof requestedId!=='string'||!/^[A-F0-9]{32}$/.test(requestedId))) return error('Identifiant de commande invalide.');
+  const id=requestedId||randomId(6).toUpperCase();
+  async function previousOrder(){
+    const value=requestedId&&await db.prepare('SELECT value FROM orders WHERE id=?').bind(id).first('value');
+    if(!value) return null;
+    const order=JSON.parse(value);
+    return sameOrder(order,customer,body.items)
+      ? json({order,whatsapp:catalog.store.whatsapp})
+      : error('Cette commande a déjà été enregistrée avec d’autres informations.',409);
+  }
+  const previous=await previousOrder();
+  if(previous) return previous;
   const items = [];
   for (const row of body.items) {
     const product = catalog.products.find(p => p.id === row?.id);
     if (!product || product.active===false || !product.colors.includes(row.color) || !product.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty < 1 || row.qty > 99) return error('Un article ou une variante du panier a changé.');
     items.push({ id: product.id, name: product.name, gender:collectionLabels[product.gender], deliveryIncluded:product.deliveryIncluded===true, price: product.price, color: row.color, size: row.size, qty: row.qty });
   }
-  const id = randomId(6).toUpperCase();
   const total = items.reduce((sum, row) => sum + Math.round(row.price * 100) * row.qty, 0) / 100;
   const order = { id, customer, items, status: statuses[0], createdAt: new Date().toISOString(), total };
   const result=await db.prepare(insertOrderSql).bind(id,JSON.stringify(order),JSON.stringify(stockRequirements(items,catalog.products))).run();
-  if(!result.meta.changes) return error('Stock insuffisant. Vérifiez les quantités du panier.',409);
+  if(!result.meta.changes) return await previousOrder() || error('Stock insuffisant. Vérifiez les quantités du panier.',409);
   return json({ order, whatsapp: catalog.store.whatsapp }, 201);
 }
 
@@ -129,8 +141,11 @@ async function handle(request, env) {
   const method = request.method;
   const db = env.DB;
   if (method === 'GET' && path === '/api/catalog') {
-    if (!db) return json({ ...initialCatalog, store, colors });
-    return json((await readCatalog(db)).catalog);
+    if (!db) return json({ ...initialCatalog, store, colors, checkoutAvailable:false });
+    const {catalog}=await readCatalog(db);
+    const tracked=catalog.products.filter(product=>product.stock!=null).map(product=>product.id);
+    const usage=tracked.length?(await db.prepare(stockUsageSql).bind(JSON.stringify(tracked)).all()).results:[];
+    return json({...catalog,products:withRemainingStock(catalog.products,usage),checkoutAvailable:true});
   }
   if (!db) return error('La base de données de la boutique reste à configurer.', 503);
 
@@ -201,7 +216,7 @@ async function handle(request, env) {
     return json({ ...catalog, revision: await signature(secret, 'catalog:' + savedCatalog) });
   }
   if (method === 'POST' && path === '/api/admin/image') return uploadImage(db, body.image);
-  const orderId = /^\/api\/admin\/orders\/([A-F0-9]{12})$/.exec(path)?.[1];
+  const orderId = /^\/api\/admin\/orders\/([A-F0-9]{12}|[A-F0-9]{32})$/.exec(path)?.[1];
   if (method === 'PUT' && orderId) {
     if (!statuses.includes(body.status)) return error('Statut invalide.');
     const row = await db.prepare('SELECT value FROM orders WHERE id = ?').bind(orderId).first('value');

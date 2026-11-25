@@ -1,5 +1,5 @@
 import React,{useRef,useState} from 'react';
-import {ArrowRight,ArrowUpRight,ChevronLeft,ChevronRight,ImageOff,ShoppingBag,Truck} from 'lucide-react';
+import {ArrowRight,ArrowUpRight,ChevronLeft,ChevronRight,ImageOff,MessageCircle,ShoppingBag,Truck} from 'lucide-react';
 import {collectionLabels,showroomImage,views} from '../showroom.mjs';
 
 const collections=[
@@ -80,11 +80,11 @@ export function CollectionPage({catalog,gender,initialProduct,initialColor,categ
  const color=p?.colors.includes(requestedColor)?requestedColor:p?.colors[0];
  const size=p?.sizes.includes(requestedSize)?requestedSize:'';
  const title=gender==='homme'?t('Collection Homme','مجموعة الرجال'):gender==='femme'?t('Collection Femme','مجموعة النساء'):(p?.name||t('Showroom','المعرض'));
- const soldOut=p?.stock===0;
+ const soldOut=(p?.availableStock??p?.stock)===0;
  const order=p?`Bonjour Aguti, je souhaite commander ${p.name} · ${collectionLabels[p.gender]||''} · ${color} · ${size} · 1 × ${money(p.price)}${p.deliveryIncluded?' (livraison incluse)':''}.`:'';
  return <section className="collection-page">
   <div className="container collection-shell">
-   <nav className="collection-switch" aria-label={t('Collections','المجموعات')}>{collections.map(item=><a key={item.id} href={'/collection/'+item.id} aria-current={gender===item.id?'page':undefined}>{item.id==='homme'?t('Homme','رجال'):t('Femme','نساء')}</a>)}</nav>
+   <nav className="collection-switch" aria-label={t('Collections','المجموعات')}>{collections.map(item=><a key={item.id} href={'/collection/'+item.id+(category?'?categorie='+encodeURIComponent(category):'')} aria-current={gender===item.id?'page':undefined}>{item.id==='homme'?t('Homme','رجال'):t('Femme','نساء')}</a>)}</nav>
    <h1>{title}</h1>
    {p?<div className="showroom-grid">
     <Viewer key={p.id} p={p} color={color} t={t}/>
@@ -98,7 +98,9 @@ export function CollectionPage({catalog,gender,initialProduct,initialColor,categ
      {soldOut&&<p role="status">{t('Rupture de stock','نفد المخزون')}</p>}
      <div className="showroom-actions">
       <button className="button dark" type="button" disabled={!size||soldOut} onClick={()=>add(p,color,size,1)}><ShoppingBag size={17}/>{t('Ajouter au panier','أضف للسلة')}</button>
-      {size&&!soldOut&&<Whats className="button outline" message={order}>WhatsApp</Whats>}
+      {size&&!soldOut&&(catalog.checkoutAvailable===true
+       ?<button className="button outline" type="button" onClick={()=>add(p,color,size,1,true)}><MessageCircle size={17}/>WhatsApp</button>
+       :<Whats className="button outline" message={order}>WhatsApp</Whats>)}
       {!size&&!soldOut&&<small>{t('Choisissez une taille','اختار المقاس')}</small>}
      </div>
      <p className="detail-delivery"><Truck size={18}/>{t('Livraison au Maroc · Paiement à la livraison','التوصيل في المغرب · الدفع عند الاستلام')}</p>
