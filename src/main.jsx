@@ -1,6 +1,6 @@
 import React,{useState,useEffect,createContext,useContext} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ArrowRight,ShoppingBag,Menu,X,Globe,MessageCircle,Truck,ShieldCheck,Feather,WashingMachine,Star,Plus,Minus,Instagram,Facebook,Check,Mail} from 'lucide-react';
+import {ArrowRight,ShoppingBag,Menu,X,Globe,MessageCircle,Truck,Star,Plus,Minus,Instagram,Facebook,Check,Mail} from 'lucide-react';
 import {products,categories,store,colors,withShowroomDefaults} from '../catalog.mjs';
 import {showroomImage} from '../showroom.mjs';
 import {CollectionLanding,CollectionPage,Editorial} from './showroom.jsx';
@@ -39,16 +39,16 @@ function ProductImage({p,color}){
  return src?<img loading="lazy" src={src} alt=""/>:null;
 }
 const campaignBenefits = [
- [ShieldCheck,'قماش عالي الجودة'],
- [Feather,'خفيفة ومريحة'],
- [WashingMachine,'سهلة الغسل'],
- [Truck,'التوصيل لجميع المدن'],
+ ['quality','قماش عالي الجودة'],
+ ['comfort','خفيفة ومريحة'],
+ ['wash','سهلة الغسل'],
+ ['delivery','التوصيل لجميع المدن'],
 ];
 
 function CampaignHero(){
  return <section aria-labelledby="campaign-title" className="campaign-hero" lang="ar" dir="rtl">
   <div className="hero">
-   <img className="hero-photo" src="/images/hero-campaign.webp" fetchPriority="high" alt=""/>
+   <img className="hero-photo" src="/images/hero-campaign-hd.webp" srcSet="/images/hero-campaign-compact.webp 900w, /images/hero-campaign-hd.webp 1536w" sizes="(max-width: 720px) 145vw, 100vw" fetchPriority="high" alt=""/>
    <div className="container hero-inner">
     <h1 id="campaign-title">ملابس طبية</h1>
     <p className="campaign-subtitle">جودة عالية .. راحة تامة</p>
@@ -62,7 +62,7 @@ function CampaignHero(){
   <div className="campaign-information">
    <div className="container campaign-information-inner">
     <ul className="campaign-benefits">
-     {campaignBenefits.map(([Icon,label])=><li key={label}><Icon size={34} aria-hidden="true"/>{label}</li>)}
+     {campaignBenefits.map(([id,label])=><li key={id}><img src={'/images/benefit-'+id+'.webp'} width="46" height="46" alt=""/>{label}</li>)}
     </ul>
    </div>
   </div>
@@ -71,7 +71,7 @@ function CampaignHero(){
 
 function Home(){
  const {t,catalog}=useShop();
- return <><CampaignHero/><CollectionLanding t={t} embedded/><Editorial t={t} catalog={catalog}/><section className="container about editorial-about" id="about"><img src="/images/about.webp" alt="Atelier Aguti" loading="lazy"/><div><p className="eyebrow">{t('À PROPOS D’AGUTI','عن أغوتي')}</p><h2>{t('Le style au service de votre métier.','الأناقة في خدمة مهنتك.')}</h2><p>{t('Aguti est votre spécialiste marocain du vêtement professionnel. Nous sélectionnons des coupes, des matières et des couleurs adaptées aux journées de celles et ceux qui font la différence sur le terrain.','أغوتي متخصصة في الملابس المهنية بالمغرب. نختار القصات والأقمشة والألوان لتناسب يومك في العمل.')}</p><a className="text-link" href="/boutique">{t('Découvrir nos tenues','اكتشف ملابسنا')}<ArrowRight size={18}/></a></div></section><section className="container section editorial-reviews"><SectionTitle tag={t('TÉMOIGNAGES','آراء العملاء')} title={t('Les tenues au quotidien','الملابس في يوم العمل')} description={t('Exemples de retours clients.','أمثلة على آراء العملاء.')}/><div className="review-layout"><img src={showroomImage('homme','Bleu ciel','walking')} loading="lazy" alt=""/><div className="reviews">{[['« Une coupe confortable même après une longue garde. »','Personnel soignant'],['« La blouse est bien coupée et facile à entretenir. »','Cabinet médical'],['« Toute notre équipe a pu trouver sa taille. »','Équipe technique']].map(([quote,author])=><article key={author}><div aria-label="5 étoiles">{Array.from({length:5},(_,i)=><Star size={15} key={i} fill="currentColor"/>)}</div><p>{quote}</p><small>{author}</small></article>)}</div></div></section></>;
+ return <><CampaignHero/><CollectionLanding t={t} embedded/><Editorial t={t} catalog={catalog}/><section className="container about editorial-about" id="about"><img src="/images/atelier-aguti.webp" alt={t('Finitions d’une tenue médicale en atelier','خياطة طقم طبي فالورشة')} loading="lazy" decoding="async"/><div><p className="eyebrow">{t('À PROPOS D’AGUTI','عن أغوتي')}</p><h2>{t('Le style au service de votre métier.','الأناقة في خدمة مهنتك.')}</h2><p>{t('Aguti est votre spécialiste marocain du vêtement professionnel. Nous sélectionnons des coupes, des matières et des couleurs adaptées aux journées de celles et ceux qui font la différence sur le terrain.','أغوتي متخصصة في الملابس المهنية بالمغرب. نختار القصات والأقمشة والألوان لتناسب يومك في العمل.')}</p><a className="text-link" href="/boutique">{t('Découvrir nos tenues','اكتشف ملابسنا')}<ArrowRight size={18}/></a></div></section><section className="container section editorial-reviews"><SectionTitle tag={t('TÉMOIGNAGES','آراء العملاء')} title={t('Les tenues au quotidien','الملابس في يوم العمل')} description={t('Exemples de retours clients.','أمثلة على آراء العملاء.')}/><div className="review-layout"><img src={showroomImage('homme','Bleu ciel','walking')} loading="lazy" alt=""/><div className="reviews">{[['« Une coupe confortable même après une longue garde. »','Personnel soignant'],['« La blouse est bien coupée et facile à entretenir. »','Cabinet médical'],['« Toute notre équipe a pu trouver sa taille. »','Équipe technique']].map(([quote,author])=><article key={author}><div aria-label="5 étoiles">{Array.from({length:5},(_,i)=><Star size={15} key={i} fill="currentColor"/>)}</div><p>{quote}</p><small>{author}</small></article>)}</div></div></section></>;
 }
 function Quantity({qty,onChange,max=99}){return <div className="quantity"><button type="button" aria-label="−" disabled={qty<=1} onClick={()=>onChange(qty-1)}><Minus size={16}/></button><output>{qty}</output><button type="button" aria-label="+" disabled={qty>=max} onClick={()=>onChange(qty+1)}><Plus size={16}/></button></div>}
 function Modal({children,close,label,drawer=false}){

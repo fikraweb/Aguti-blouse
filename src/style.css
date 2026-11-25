@@ -225,3 +225,8 @@ body:has(dialog[open]){overflow:hidden}
  .campaign-benefits li{font-size:11px}
  .campaign-benefits svg{width:29px;height:29px}
 }
+.campaign-benefits li{gap:10px}
+.campaign-benefits img{width:46px;height:46px;object-fit:contain;flex:none}
+.header-actions .icon{transition:background-color .18s,color .18s}
+.header-actions .icon svg,.hero-actions svg,.button svg{stroke-width:1.75}
+@media(max-width:720px){.campaign-benefits img{width:37px;height:37px}.campaign-benefits li{gap:6px}}

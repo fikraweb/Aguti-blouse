@@ -3,8 +3,8 @@ import {ArrowRight,ArrowUpRight,ChevronLeft,ChevronRight,ImageOff,ShoppingBag,Tr
 import {collectionLabels,showroomImage,views} from '../showroom.mjs';
 
 const collections=[
- {id:'homme',title:'COLLECTION HOMME',ar:'مجموعة الرجال',color:'Bleu royal'},
- {id:'femme',title:'COLLECTION FEMME',ar:'مجموعة النساء',color:'Bordeaux'},
+ {id:'homme',title:'COLLECTION HOMME',ar:'مجموعة الرجال'},
+ {id:'femme',title:'COLLECTION FEMME',ar:'مجموعة النساء'},
 ];
 export const money=value=>new Intl.NumberFormat('fr-MA',{maximumFractionDigits:2}).format(value)+' MAD';
 
@@ -17,7 +17,7 @@ export function CollectionLanding({t,category,embedded=false}){
    <p>{t('Découvrez notre collection de tenues professionnelles.','اكتشف مجموعتنا من الملابس المهنية.')}</p>
   </div>
   <div className="landing-pair">{collections.map(item=><a href={'/collection/'+item.id+query} className={'collection-portal portal-'+item.id} key={item.id}>
-   <img src={showroomImage(item.id,item.color,'front')} fetchPriority={embedded?undefined:'high'} loading={embedded?'lazy':undefined} alt=""/>
+   <img src={'/images/collection-'+item.id+'-hd.webp'} decoding="async" fetchPriority={embedded?undefined:'high'} loading={embedded?'lazy':undefined} alt=""/>
    <div className="portal-label"><span>{t(item.title,item.ar)}</span><ArrowUpRight size={23}/></div>
   </a>)}</div>
  </section>;
@@ -63,7 +63,7 @@ function Viewer({p,color,t}){
   </div>
   <figure className="model-stage">
    <div className="stage-media" onTouchStart={e=>{touch.current=e.touches[0];}} onTouchEnd={endSwipe} onTouchCancel={()=>{touch.current=null;}}>
-    {image&&image!==failed?<img key={image} src={image} alt={p.name+' · '+color+' · '+t(...views[current])} onError={()=>setFailed(image)}/>:<div className="stage-empty"><ImageOff size={30}/><span>{t('Visuel indisponible pour cette couleur','لا توجد صورة لهذا اللون')}</span></div>}
+    {image&&image!==failed?<img key={image} src={image} decoding="async" alt={p.name+' · '+color+' · '+t(...views[current])} onError={()=>setFailed(image)}/>:<div className="stage-empty"><ImageOff size={30}/><span>{t('Visuel indisponible pour cette couleur','لا توجد صورة لهذا اللون')}</span></div>}
     {entries.length>1&&<div className="stage-arrows"><button className="icon" type="button" aria-label={t('Vue précédente','الصورة السابقة')} onClick={()=>move(-1)}><ChevronLeft size={19}/></button><button className="icon" type="button" aria-label={t('Vue suivante','الصورة التالية')} onClick={()=>move(1)}><ChevronRight size={19}/></button></div>}
    </div>
    <figcaption aria-live="polite">{current&&<span>{t(...views[current])} · {color}</span>}{image?.startsWith('/images/showroom-')&&<small>{t('Visuel studio illustratif','صورة استوديو توضيحية')}</small>}</figcaption>

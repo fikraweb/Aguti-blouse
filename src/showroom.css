@@ -105,3 +105,5 @@
  .showroom-editorial .editorial-photo{min-height:250px}
  .showroom-editorial .editorial-photo:nth-child(2){min-height:220px;margin-top:20px}
 }
+.stage-arrows .icon{border:1px solid #213d4526;box-shadow:0 2px 7px #112a3422}
+.stage-arrows svg,.portal-label svg,.editorial-photo svg{stroke-width:1.65}
