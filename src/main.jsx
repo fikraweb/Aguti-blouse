@@ -1,7 +1,7 @@
 import React,{useState,useEffect,createContext,useContext} from 'react';
 import {createRoot} from 'react-dom/client';
 import {ArrowRight,ArrowUpRight,ShoppingBag,Menu,X,Globe,MessageCircle,Truck,ShieldCheck,Shirt,Ruler,Headphones,Feather,WashingMachine,Star,Plus,Minus,MapPin,Phone,Instagram,Facebook,Check,Mail} from 'lucide-react';
-import {products,categories,store,colors,uniformColors,withShowroomDefaults} from '../catalog.mjs';
+import {products,categories,store,colors,withShowroomDefaults} from '../catalog.mjs';
 import {showroomImage} from '../showroom.mjs';
 import {CollectionLanding,CollectionPage,Editorial} from './showroom.jsx';
 import './style.css';
@@ -39,7 +39,6 @@ function ProductImage({p,color}){
  return src?<img loading="lazy" src={src} alt=""/>:null;
 }
 const promises=[[ShieldCheck,'Qualité supérieure','جودة فائقة'],[Shirt,'Confort au quotidien','راحة يومية'],[Ruler,'Couleurs et tailles variées','ألوان ومقاسات متنوعة'],[Truck,'Livraison dans tout le Maroc','التوصيل في كل المغرب'],[Headphones,'Service client personnalisé','خدمة عملاء شخصية']];
-const campaignColors = ['أخضر (طبي)','أبيض','كحل','زرق','بلومرين','بورد','مارو','غوز','باج','كري','خزي'];
 const campaignBenefits = [
  [ShieldCheck,'قماش عالي الجودة'],
  [Feather,'خفيفة ومريحة'],
@@ -63,11 +62,8 @@ function CampaignHero(){
   </div>
   <div className="campaign-information">
    <div className="container campaign-information-inner">
-    <ul className="campaign-colors" aria-label="الألوان">
-     {Object.entries(uniformColors).map(([name,color],i)=><li key={name}><span className="campaign-swatch" style={{backgroundColor:color}}/>{campaignColors[i]}</li>)}
-    </ul>
     <ul className="campaign-benefits">
-     {campaignBenefits.map(([Icon,label])=><li key={label}><Icon size={19} aria-hidden="true"/>{label}</li>)}
+     {campaignBenefits.map(([Icon,label])=><li key={label}><Icon size={34} aria-hidden="true"/>{label}</li>)}
     </ul>
    </div>
   </div>

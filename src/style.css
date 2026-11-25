@@ -219,18 +219,14 @@ body:has(dialog[open]){overflow:hidden}
 .campaign-hero .hero-inner .campaign-tagline{margin-top:8px;font-size:clamp(15px,1.65vw,24px);font-weight:600}
 .campaign-hero .hero-actions svg:not(.lucide-message-circle){transform:rotate(180deg)}
 .campaign-information{background:#102131;color:#f4faf8;border-top:1px solid #a3ebd42b}
-.campaign-information-inner{padding-block:15px;display:grid;gap:14px}
-.campaign-colors,.campaign-benefits{display:grid;list-style:none;margin:0;padding:0;text-align:center}
-.campaign-colors{grid-template-columns:repeat(11,minmax(0,1fr));row-gap:11px}
-.campaign-colors li{display:grid;align-content:start;justify-items:center;gap:6px;font-size:12px;line-height:1.6;font-weight:700}
-.campaign-swatch{width:23px;height:23px;border:1px solid #ffffff71;border-radius:50%}
-.campaign-benefits{padding-top:13px;border-top:1px solid #ffffff23;grid-template-columns:repeat(4,1fr);gap:8px}
+.campaign-information-inner{padding-block:18px}
+.campaign-benefits{display:grid;list-style:none;margin:0;padding:0;text-align:center}
+.campaign-benefits{grid-template-columns:repeat(4,1fr);gap:8px}
 .campaign-benefits li{display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:700}
 .campaign-benefits svg{color:#9be7cf;flex:none}
 @media(max-width:720px){
  .campaign-hero .hero-inner{justify-items:start;text-align:right}
- .campaign-colors{grid-template-columns:repeat(6,minmax(0,1fr))}
- .campaign-colors li{font-size:10px}
  .campaign-benefits{grid-template-columns:repeat(2,1fr)}
  .campaign-benefits li{font-size:11px}
+ .campaign-benefits svg{width:29px;height:29px}
 }
