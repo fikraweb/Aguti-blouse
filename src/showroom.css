@@ -1,6 +1,6 @@
 .showroom-landing{background:#101c26;color:#f9f8f5;padding:0}
 .landing-intro{padding:28px 18px 23px;text-align:center}
-.landing-intro h1{font-size:clamp(29px,4.2vw,62px);letter-spacing:-.055em}
+.landing-intro :is(h1,h2){font-size:clamp(29px,4.2vw,62px);letter-spacing:-.055em}
 .landing-intro p{margin-top:7px;color:#cbd6d6;font-size:clamp(12px,1.2vw,16px)}
 .landing-pair{display:grid;grid-template-columns:1fr 1fr;gap:2px}
 .collection-portal{position:relative;isolation:isolate;display:grid;align-items:end;overflow:hidden;min-height:clamp(460px,66vh,760px);background:radial-gradient(ellipse at 50% 27%,#e0dcda,#8e8b88)}

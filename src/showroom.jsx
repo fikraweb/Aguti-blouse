@@ -8,15 +8,16 @@ const collections=[
 ];
 export const money=value=>new Intl.NumberFormat('fr-MA',{maximumFractionDigits:2}).format(value)+' MAD';
 
-export function CollectionLanding({t,category}){
+export function CollectionLanding({t,category,embedded=false}){
  const query=category?'?categorie='+encodeURIComponent(category):'';
- return <section className="showroom-landing" aria-label={t('Collections Aguti','مجموعات أغوتي')}>
+ const Title=embedded?'h2':'h1';
+ return <section className="showroom-landing" id="collections" aria-label={t('Collections Aguti','مجموعات أغوتي')}>
   <div className="landing-intro">
-   <h1>{t('Le vestiaire professionnel.','اللباس المهني.')}</h1>
+   <Title>{embedded?t('Choisissez votre collection','اختار المجموعة ديالك'):t('Le vestiaire professionnel.','اللباس المهني.')}</Title>
    <p>{t('Découvrez notre collection de tenues professionnelles.','اكتشف مجموعتنا من الملابس المهنية.')}</p>
   </div>
   <div className="landing-pair">{collections.map(item=><a href={'/collection/'+item.id+query} className={'collection-portal portal-'+item.id} key={item.id}>
-   <img src={showroomImage(item.id,item.color,'front')} fetchPriority="high" alt=""/>
+   <img src={showroomImage(item.id,item.color,'front')} fetchPriority={embedded?undefined:'high'} loading={embedded?'lazy':undefined} alt=""/>
    <div className="portal-label"><span>{t(item.title,item.ar)}</span><ArrowUpRight size={23}/></div>
   </a>)}</div>
  </section>;
