@@ -1,7 +1,7 @@
 import React,{useState,useEffect,createContext,useContext} from 'react';
 import {createRoot} from 'react-dom/client';
-import {ArrowRight,ArrowUpRight,ShoppingBag,Menu,X,Globe,MessageCircle,Truck,ShieldCheck,Shirt,Ruler,Headphones,Star,Plus,Minus,MapPin,Phone,Instagram,Facebook,Check,Mail} from 'lucide-react';
-import {products,categories,store,colors,withShowroomDefaults} from '../catalog.mjs';
+import {ArrowRight,ArrowUpRight,ShoppingBag,Menu,X,Globe,MessageCircle,Truck,ShieldCheck,Shirt,Ruler,Headphones,Feather,WashingMachine,Star,Plus,Minus,MapPin,Phone,Instagram,Facebook,Check,Mail} from 'lucide-react';
+import {products,categories,store,colors,uniformColors,withShowroomDefaults} from '../catalog.mjs';
 import {showroomImage} from '../showroom.mjs';
 import {CollectionLanding,CollectionPage,Editorial} from './showroom.jsx';
 import './style.css';
@@ -22,7 +22,7 @@ const amount=value=>new Intl.NumberFormat('fr-MA',{maximumFractionDigits:2}).for
 const load=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)) ?? fallback;}catch{return fallback;}};
 const wa=(number,body)=>number?'https://wa.me/'+number.replace(/\D/g,'')+'?text='+encodeURIComponent(body):'/#contact';
 const ico=18;
-function Brand(){return <a href="/" className="brand" aria-label="Aguti, accueil"><span className="brand-mark"><Shirt size={19} strokeWidth={1.65}/></span><span>AGUTI<small>WORKWEAR</small></span></a>}
+function Brand(){return <a href="/" className="brand" aria-label="Aguti, accueil"><span className="brand-mark"><img src="/images/aguti-monogram.webp" alt="" width="40" height="40"/></span><span>AGUTI<small>WORKWEAR</small></span></a>}
 function SectionTitle({tag,title,description,action}){return <div className="section-heading"><div><p className="eyebrow">{tag}</p><h2>{title}</h2>{description&&<p className="muted">{description}</p>}</div>{action}</div>}
 function Whats({children,message='Bonjour Aguti, je souhaite en savoir plus sur vos tenues.',className='button',...props}){
  const {catalog}=useShop();
@@ -39,9 +39,44 @@ function ProductImage({p,color}){
  return src?<img loading="lazy" src={src} alt=""/>:null;
 }
 const promises=[[ShieldCheck,'Qualité supérieure','جودة فائقة'],[Shirt,'Confort au quotidien','راحة يومية'],[Ruler,'Couleurs et tailles variées','ألوان ومقاسات متنوعة'],[Truck,'Livraison dans tout le Maroc','التوصيل في كل المغرب'],[Headphones,'Service client personnalisé','خدمة عملاء شخصية']];
+const campaignColors = ['أخضر (طبي)','أبيض','كحل','زرق','بلومرين','بورد','مارو','غوز','باج','كري','خزي'];
+const campaignBenefits = [
+ [ShieldCheck,'قماش عالي الجودة'],
+ [Feather,'خفيفة ومريحة'],
+ [WashingMachine,'سهلة الغسل'],
+ [Truck,'التوصيل لجميع المدن'],
+];
+
+function CampaignHero(){
+ return <section aria-labelledby="campaign-title" className="campaign-hero" lang="ar" dir="rtl">
+  <div className="hero">
+   <img className="hero-photo" src="/images/hero-campaign.webp" fetchPriority="high" alt=""/>
+   <div className="container hero-inner">
+    <h1 id="campaign-title">ملابس طبية</h1>
+    <p className="campaign-subtitle">جودة عالية .. راحة تامة</p>
+    <p className="campaign-tagline">اختيارك الأمثل للراحة والأناقة</p>
+    <div className="hero-actions">
+     <a className="button mint" href="#collections">اختار طقمك <ArrowRight size={18}/></a>
+     <Whats className="button glass">اطلب عبر واتساب</Whats>
+    </div>
+   </div>
+  </div>
+  <div className="campaign-information">
+   <div className="container campaign-information-inner">
+    <ul className="campaign-colors" aria-label="الألوان">
+     {Object.entries(uniformColors).map(([name,color],i)=><li key={name}><span className="campaign-swatch" style={{backgroundColor:color}}/>{campaignColors[i]}</li>)}
+    </ul>
+    <ul className="campaign-benefits">
+     {campaignBenefits.map(([Icon,label])=><li key={label}><Icon size={19} aria-hidden="true"/>{label}</li>)}
+    </ul>
+   </div>
+  </div>
+ </section>;
+}
+
 function Home(){
  const {t,catalog}=useShop();
- return <><section className="hero"><img className="hero-photo" src="/images/hero-campaign.webp" fetchPriority="high" alt=""/><div className="container hero-inner"><p className="eyebrow hero-tag"><span/>{t('L’EXIGENCE DU VÊTEMENT PROFESSIONNEL','ملابس مهنية بمعايير عالية')}</p><h1>{t('Des tenues professionnelles qui font la différence.','ملابس مهنية تصنع الفرق.')}</h1><p>{t('Découvrez notre collection de vêtements professionnels alliant confort, qualité et élégance.','اكتشف مجموعتنا من الملابس المهنية التي تجمع بين الراحة والجودة والأناقة.')}</p><div className="hero-actions"><a className="button mint" href="#collections">{t('Choisir ma tenue','اختار طقمك')}<ArrowRight size={18}/></a><Whats className="button glass">{t('Commander sur WhatsApp','اطلب عبر واتساب')}</Whats></div></div></section><CollectionLanding t={t} embedded/><Editorial t={t} catalog={catalog}/><section className="container section benefits"><SectionTitle tag={t('NOTRE ENGAGEMENT','التزامنا')} title={t('Pensé pour votre quotidien','مصمم ليومك المهني')}/><img className="quality-photo" src={showroomImage('femme','Vert médical','detail')} alt={t('Détail de la tenue médicale Aguti','تفاصيل طقم أغوتي الطبي')} loading="lazy"/><div className="benefit-grid">{promises.map(([Icon,fr,ar])=><div key={fr}><Icon size={27}/><h3>{t(fr,ar)}</h3></div>)}</div></section><section className="container about" id="about"><img src="/images/about.webp" alt="Atelier Aguti" loading="lazy"/><div><p className="eyebrow">{t('À PROPOS D’AGUTI','عن أغوتي')}</p><h2>{t('Le style au service de votre métier.','الأناقة في خدمة مهنتك.')}</h2><p>{t('Aguti est votre spécialiste marocain du vêtement professionnel. Nous sélectionnons des coupes, des matières et des couleurs adaptées aux journées de celles et ceux qui font la différence sur le terrain.','أغوتي متخصصة في الملابس المهنية بالمغرب. نختار القصات والأقمشة والألوان لتناسب يومك في العمل.')}</p><a className="text-link" href="/boutique">{t('Découvrir nos tenues','اكتشف ملابسنا')}<ArrowRight size={18}/></a></div></section><section className="container section"><SectionTitle tag={t('TÉMOIGNAGES','آراء العملاء')} title={t('Les tenues au quotidien','الملابس في يوم العمل')} description={t('Exemples de retours clients.','أمثلة على آراء العملاء.')}/><div className="review-layout"><img src={showroomImage('homme','Bleu ciel','walking')} loading="lazy" alt=""/><div className="reviews">{[['« Une coupe confortable même après une longue garde. »','Personnel soignant'],['« La blouse est bien coupée et facile à entretenir. »','Cabinet médical'],['« Toute notre équipe a pu trouver sa taille. »','Équipe technique']].map(([quote,author])=><article key={author}><div aria-label="5 étoiles">{Array.from({length:5},(_,i)=><Star size={15} key={i} fill="currentColor"/>)}</div><p>{quote}</p><small>{author}</small></article>)}</div></div></section><Contact/></>;
+ return <><CampaignHero/><CollectionLanding t={t} embedded/><Editorial t={t} catalog={catalog}/><section className="container section benefits"><SectionTitle tag={t('NOTRE ENGAGEMENT','التزامنا')} title={t('Pensé pour votre quotidien','مصمم ليومك المهني')}/><img className="quality-photo" src={showroomImage('femme','Vert médical','detail')} alt={t('Détail de la tenue médicale Aguti','تفاصيل طقم أغوتي الطبي')} loading="lazy"/><div className="benefit-grid">{promises.map(([Icon,fr,ar])=><div key={fr}><Icon size={27}/><h3>{t(fr,ar)}</h3></div>)}</div></section><section className="container about" id="about"><img src="/images/about.webp" alt="Atelier Aguti" loading="lazy"/><div><p className="eyebrow">{t('À PROPOS D’AGUTI','عن أغوتي')}</p><h2>{t('Le style au service de votre métier.','الأناقة في خدمة مهنتك.')}</h2><p>{t('Aguti est votre spécialiste marocain du vêtement professionnel. Nous sélectionnons des coupes, des matières et des couleurs adaptées aux journées de celles et ceux qui font la différence sur le terrain.','أغوتي متخصصة في الملابس المهنية بالمغرب. نختار القصات والأقمشة والألوان لتناسب يومك في العمل.')}</p><a className="text-link" href="/boutique">{t('Découvrir nos tenues','اكتشف ملابسنا')}<ArrowRight size={18}/></a></div></section><section className="container section"><SectionTitle tag={t('TÉMOIGNAGES','آراء العملاء')} title={t('Les tenues au quotidien','الملابس في يوم العمل')} description={t('Exemples de retours clients.','أمثلة على آراء العملاء.')}/><div className="review-layout"><img src={showroomImage('homme','Bleu ciel','walking')} loading="lazy" alt=""/><div className="reviews">{[['« Une coupe confortable même après une longue garde. »','Personnel soignant'],['« La blouse est bien coupée et facile à entretenir. »','Cabinet médical'],['« Toute notre équipe a pu trouver sa taille. »','Équipe technique']].map(([quote,author])=><article key={author}><div aria-label="5 étoiles">{Array.from({length:5},(_,i)=><Star size={15} key={i} fill="currentColor"/>)}</div><p>{quote}</p><small>{author}</small></article>)}</div></div></section><Contact/></>;
 }
 function Contact(){
  const {catalog,t}=useShop();

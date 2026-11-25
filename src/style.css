@@ -210,3 +210,27 @@ body:has(dialog[open]){overflow:hidden}
  .hero-inner{padding-block:clamp(226px,65vw,370px) 32px}
  [dir=rtl] .hero-inner{justify-items:start;text-align:right}
 }
+.brand-mark{background:radial-gradient(circle at 31% 22%,#355d5b,#142e38 70%);box-shadow:inset 0 1px 1px #ffffff35,0 2px 6px #14233424}
+.brand-mark img{width:87%;height:87%;object-fit:contain}
+.campaign-hero{font-family:"Noto Sans Arabic",Arial,sans-serif}
+.campaign-hero .hero-inner{display:grid;justify-items:end;text-align:left}
+.campaign-hero h1{font-family:inherit;font-size:clamp(47px,7vw,107px);letter-spacing:0;line-height:1.24}
+.campaign-hero .hero-inner .campaign-subtitle{color:#f9d65e;font-size:clamp(19px,2.55vw,37px);font-weight:800;line-height:1.55;margin-top:5px;max-width:none}
+.campaign-hero .hero-inner .campaign-tagline{margin-top:8px;font-size:clamp(15px,1.65vw,24px);font-weight:600}
+.campaign-hero .hero-actions svg:not(.lucide-message-circle){transform:rotate(180deg)}
+.campaign-information{background:#102131;color:#f4faf8;border-top:1px solid #a3ebd42b}
+.campaign-information-inner{padding-block:15px;display:grid;gap:14px}
+.campaign-colors,.campaign-benefits{display:grid;list-style:none;margin:0;padding:0;text-align:center}
+.campaign-colors{grid-template-columns:repeat(11,minmax(0,1fr));row-gap:11px}
+.campaign-colors li{display:grid;align-content:start;justify-items:center;gap:6px;font-size:12px;line-height:1.6;font-weight:700}
+.campaign-swatch{width:23px;height:23px;border:1px solid #ffffff71;border-radius:50%}
+.campaign-benefits{padding-top:13px;border-top:1px solid #ffffff23;grid-template-columns:repeat(4,1fr);gap:8px}
+.campaign-benefits li{display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:700}
+.campaign-benefits svg{color:#9be7cf;flex:none}
+@media(max-width:720px){
+ .campaign-hero .hero-inner{justify-items:start;text-align:right}
+ .campaign-colors{grid-template-columns:repeat(6,minmax(0,1fr))}
+ .campaign-colors li{font-size:10px}
+ .campaign-benefits{grid-template-columns:repeat(2,1fr)}
+ .campaign-benefits li{font-size:11px}
+}
