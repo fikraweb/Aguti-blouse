@@ -1,3 +1,5 @@
+import {showroomImage,views} from './showroom.mjs';
+
 export const referencePhoto = '/images/hero-medical.jpg';
 
 export const categories = [
@@ -24,6 +26,14 @@ export const colors = {
  'Vert émeraude':'#1c645b','Bleu marine':'#172e49','Lavande':'#aaa0c5','Camel':'#a17a58','Vert sauge':'#8d9e88',
 };
 
+export function withShowroomDefaults(product) {
+ const gender=product.gender||(product.id===101?'femme':product.id===102?'homme':undefined);
+ if(!gender) return product;
+ if(product.images[0]!==referencePhoto||![101,102].includes(product.id)) return {...product,gender};
+ const gallery=Object.fromEntries(product.colors.filter(color=>Object.hasOwn(uniformColors,color)).map(color=>[color,Object.fromEntries(Object.keys(views).map(angle=>[angle,showroomImage(gender,color,angle)]))]));
+ return {...product,gender,images:[showroomImage(gender,'Vert médical')],gallery:product.gallery??gallery};
+}
+
 const details = {
  category:'medical', price:299, images:[referencePhoto], colors:Object.keys(uniformColors),
  sizes:['XS','S','M','L','XL','XXL'],
@@ -33,6 +43,6 @@ const details = {
 export const products = [
  {...details,id:101,name:'Ensemble médical · Coupe femme',ar:'طقم طبي بقصة نسائية',popularity:2},
  {...details,id:102,name:'Ensemble médical · Coupe homme',ar:'طقم طبي بقصة رجالية',popularity:1},
-];
+].map(withShowroomDefaults);
 
 export const store = {phone:'',whatsapp:'+212660392740',address:'',city:'Maroc',email:'',instagram:'',facebook:''};

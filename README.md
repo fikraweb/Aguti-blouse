@@ -6,7 +6,7 @@ Boutique de vêtements professionnels au Maroc avec catalogue, panier, paiement 
 
 Utilisez Node.js 24 ou une version ultérieure. Depuis le dépôt existant, lancez `npm ci` puis `npm run dev`. Le serveur écoute par défaut sur le port 3000.
 
-La boutique propose un configurateur pour la tenue médicale à col V. Les clients choisissent une coupe femme ou homme, puis une couleur parmi les onze teintes de référence et leur taille. Les vues studio sont illustratives. Les détails et échantillons proviennent de la photo fournie. Le prix initial de 299 MAD et les tailles XS à XXL sont modifiables dans l’administration. Les témoignages sont des exemples.
+Le showroom s’ouvre sur les collections Homme et Femme. Chaque collection propose six vues de studio pour chacune des onze couleurs du modèle médical. Les visuels sont générés puis déclinés par traitement du vêtement à partir de la même prise de vue pour chaque angle. Ils sont présentés comme des illustrations. Le prix initial de 299 MAD et les tailles XS à XXL sont modifiables dans l’administration. Les témoignages sont des exemples.
 
 ## Administration et commandes
 
@@ -29,3 +29,9 @@ Conservez le projet Git existant `aguti-blouse`, la branche `main`, la commande 
 4. Relancez un déploiement de `main` après avoir enregistré les bindings et les secrets. Ouvrez `/admin`, connectez-vous et vérifiez le numéro WhatsApp dans **Boutique**. Faites une commande de test et vérifiez sa présence dans **Commandes**. WhatsApp n’envoie le message que lorsque le client le confirme dans WhatsApp.
 
 Si D1 était déjà configurée, rejouez le fichier SQL pour ajouter les tables des images. Les installations Node et Cloudflare ont des bases distinctes. Une nouvelle base D1 reprend le catalogue de départ et les coordonnées par défaut. Les données créées sur une instance Node ne sont pas transférées automatiquement. La préparation d’un environnement Preview complet nécessite ses propres bindings, données et secrets.
+
+### Gestion du showroom
+
+Dans **Administration → Produits**, renseignez la collection, la description et la composition si elle est connue. Dans **Photos du showroom**, choisissez la couleur et l’angle, importez le fichier puis enregistrez le produit. Chaque combinaison pointe vers son propre fichier. Une vue manquante affiche un état indisponible si aucune photo n’existe pour cette couleur. La photo de couverture peut être ajoutée séparément. Le panneau accepte les vues de face, de dos, de profil, de trois-quarts, en mouvement et les détails.
+
+Un produit désactivé disparaît des collections. Le stock total optionnel comprend les quantités déjà commandées. Les commandes annulées libèrent la quantité correspondante. Les demandes envoyées directement via le bouton WhatsApp doivent être rapprochées du stock manuellement. Les commandes enregistrées depuis le panier réservent le stock dans la base avant d’ouvrir WhatsApp.

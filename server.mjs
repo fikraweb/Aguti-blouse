@@ -1,10 +1,11 @@
+import { collectionLabels, validShowroom, stockRequirements, insertOrderSql, updateOrderSql } from './showroom.mjs';
 import express from 'express';
 import { createServer as createHttpServer } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { randomBytes, scryptSync, timingSafeEqual, createHmac } from 'node:crypto';
 import { join, resolve } from 'node:path';
-import { products, categories, store, colors } from './catalog.mjs';
+import { products, categories, store, colors, withShowroomDefaults } from './catalog.mjs';
 
 const app = express();
 const httpServer=createHttpServer(app);
@@ -19,7 +20,7 @@ db.exec(`PRAGMA journal_mode=WAL;
  CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY, value TEXT NOT NULL);`);
 const read = (id, fallback) => JSON.parse(db.prepare('SELECT value FROM records WHERE id=?').get(id)?.value ?? JSON.stringify(fallback));
 const save = (id,value) => db.prepare('INSERT OR REPLACE INTO records VALUES (?,?)').run(id,JSON.stringify(value));
-const getCatalog = () => ({products:read('products',products),categories:read('categories',categories),store:read('store',store),colors});
+const getCatalog = () => ({products:read('products',products).map(withShowroomDefaults),categories:read('categories',categories),store:read('store',store),colors});
 const catalogRevision = () => sign(JSON.stringify([read('products',products),read('categories',categories)]));
 const clean = (value,max=500) => typeof value === 'string' ? value.trim().slice(0,max) : '';
 const adminPassword = process.env.ADMIN_PASSWORD || '';
@@ -76,12 +77,13 @@ app.post('/api/orders',limit('order',15,60000),(req,res)=>{
  const items=[];
  for (const row of source) {
   const p=catalog.products.find(p=>p.id===row?.id);
-  if (!p || !p.colors.includes(row.color) || !p.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty<1 || row.qty>99) return res.status(400).json({error:'Un article ou une variante du panier a changé.'});
-  items.push({id:p.id,name:p.name,price:p.price,color:row.color,size:row.size,qty:row.qty});
+  if (!p || p.active===false || !p.colors.includes(row.color) || !p.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty<1 || row.qty>99) return res.status(400).json({error:'Un article ou une variante du panier a changé.'});
+  items.push({id:p.id,name:p.name,gender:collectionLabels[p.gender],price:p.price,color:row.color,size:row.size,qty:row.qty});
  }
  const id=randomBytes(6).toString('hex').toUpperCase();
  const order={id,customer,items,status:'En attente WhatsApp',createdAt:new Date().toISOString(),total:items.reduce((sum,row)=>sum+Math.round(row.price*100)*row.qty,0)/100};
- db.prepare('INSERT INTO orders VALUES (?,?)').run(id,JSON.stringify(order));
+ const result=db.prepare(insertOrderSql).run(id,JSON.stringify(order),JSON.stringify(stockRequirements(items,catalog.products)));
+ if (!result.changes) return res.status(409).json({error:'Stock insuffisant. Vérifiez les quantités du panier.'});
  res.status(201).json({order,whatsapp:catalog.store.whatsapp});
 });
 app.post('/api/contact',limit('contact',10,60000),(req,res)=>{
@@ -112,7 +114,7 @@ app.put('/api/admin/catalog',admin,(req,res)=>{
  }
  const productIds=new Set();
  for (const p of nextProducts) {
-  if (!p || !Number.isSafeInteger(p.id) || productIds.has(p.id) || !ids.has(p.category) || !clean(p.name,120) || !Number.isFinite(p.price) || p.price<=0 || p.price>1e6 || !Array.isArray(p.images) || !p.images.length || p.images.some(img=>!imagePath.test(img)) || !Array.isArray(p.colors) || !p.colors.length || p.colors.some(v=>!Object.hasOwn(colors,v)) || !Array.isArray(p.sizes) || !p.sizes.length || p.sizes.some(v=>!clean(v,20))) return res.status(400).json({error:'Vérifiez le prix, les images et les variantes de chaque produit.'});
+  if (!p || !Number.isSafeInteger(p.id) || productIds.has(p.id) || !ids.has(p.category) || !clean(p.name,120) || !Number.isFinite(p.price) || p.price<=0 || p.price>1e6 || !Array.isArray(p.images) || !p.images.length || p.images.some(img=>!imagePath.test(img)) || !Array.isArray(p.colors) || !p.colors.length || p.colors.some(v=>!Object.hasOwn(colors,v)) || !Array.isArray(p.sizes) || !p.sizes.length || p.sizes.some(v=>!clean(v,20)) || !validShowroom(p)) return res.status(400).json({error:'Vérifiez le prix, les images et les variantes de chaque produit.'});
   productIds.add(p.id);
  }
  db.exec('BEGIN');
@@ -136,8 +138,11 @@ app.put('/api/admin/orders/:id',admin,(req,res)=>{
  if (!row) return res.sendStatus(404);
  const status=req.body?.status;
  if (!['En attente WhatsApp','Confirmée','Expédiée','Livrée','Annulée'].includes(status)) return res.sendStatus(400);
- const order={...JSON.parse(row.value),status};
- db.prepare('UPDATE orders SET value=? WHERE id=?').run(JSON.stringify(order),order.id);
+ const previous=JSON.parse(row.value);
+ const order={...previous,status};
+ const requirements=previous.status==='Annulée'&&status!=='Annulée'?stockRequirements(order.items,getCatalog().products):[];
+ const result=db.prepare(updateOrderSql).run(JSON.stringify(order),order.id,row.value,JSON.stringify(requirements));
+ if(!result.changes) return res.status(409).json({error:'Stock insuffisant ou commande modifiée. Actualisez la page.'});
  res.json(order);
 });
 app.use('/api',(_req,res)=>res.sendStatus(404));
@@ -155,14 +160,14 @@ if (dev) {
  const origin=process.env.PUBLIC_URL ? new URL(process.env.PUBLIC_URL).origin : '';
  app.get('/robots.txt',(_req,res)=>res.type('text').send('User-agent: *\nDisallow: /admin\nDisallow: /api/\n'+(origin?'Sitemap: '+origin+'/sitemap.xml\n':'')));
  if(origin) app.get('/sitemap.xml',(_req,res)=>{
-  const urls=['/','/boutique','/mentions',...getCatalog().products.map(p=>'/produit/'+p.id)];
+  const urls=['/','/boutique','/collection/homme','/collection/femme','/mentions',...getCatalog().products.map(p=>'/produit/'+p.id)];
   res.type('application/xml').send('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+urls.map(url=>'<url><loc>'+escape(origin+url)+'</loc></url>').join('')+'</urlset>');
  });
  app.use(express.static('dist',{maxAge:'1h',index:false,redirect:false}));
  app.get('/{*path}',(req,res)=>{
   const path=req.path.replace(/\/$/,'')||'/';
   const p=/^\/produit\/\d+$/.test(path)?getCatalog().products.find(row=>'/produit/'+row.id===path):null;
-  const title=p?.name || ({'/':'Tenues professionnelles au Maroc','/boutique':'Boutique','/mentions':'Mentions légales','/admin':'Administration'}[path]);
+  const title=p?.name || ({'/':'Tenues professionnelles au Maroc','/boutique':'Showroom','/collection/homme':'Collection Homme','/collection/femme':'Collection Femme','/mentions':'Mentions légales','/admin':'Administration'}[path]);
   const description=p?.description || 'Aguti, boutique marocaine de tenues médicales, blouses et vêtements professionnels. Livraison partout au Maroc.';
   const canonical=origin&&title&&path!=='/admin'?'<link rel="canonical" href="'+escape(origin+path)+'">':'';
   const robots=!title||path==='/admin'?'<meta name="robots" content="noindex">':'';

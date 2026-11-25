@@ -1,4 +1,5 @@
-import { products, categories, colors, store } from '../../catalog.mjs';
+import { collectionLabels, validShowroom, stockRequirements, insertOrderSql, updateOrderSql } from '../../showroom.mjs';
+import { products, categories, colors, store, withShowroomDefaults } from '../../catalog.mjs';
 
 const initialCatalog = { products, categories };
 const maxImageBytes = 5 * 1024 * 1024;
@@ -39,8 +40,9 @@ async function readRecord(db, id) {
 
 async function readCatalog(db) {
   const [savedCatalog, savedStore] = await Promise.all([readRecord(db, 'catalog'), readRecord(db, 'store')]);
+  const data=savedCatalog === null ? initialCatalog : JSON.parse(savedCatalog);
   return {
-    catalog: { ...(savedCatalog === null ? initialCatalog : JSON.parse(savedCatalog)), store: { ...store, ...(savedStore === null ? {} : JSON.parse(savedStore)) }, colors },
+    catalog: { ...data, products:data.products.map(withShowroomDefaults), store: { ...store, ...(savedStore === null ? {} : JSON.parse(savedStore)) }, colors },
     savedCatalog
   };
 }
@@ -76,6 +78,7 @@ function validCatalog(nextProducts, nextCategories) {
     if (!Array.isArray(p.colors) || !p.colors.length || p.colors.some(v => !Object.hasOwn(colors, v))) return false;
     if (!Array.isArray(p.sizes) || !p.sizes.length || p.sizes.some(v => !clean(v, 20))) return false;
     if ([p.ar, p.description, p.badge].some(v => v !== undefined && typeof v !== 'string')) return false;
+    if(!validShowroom(p)) return false;
     productIds.add(p.id);
   }
   return true;
@@ -90,13 +93,14 @@ async function createOrder(db, body) {
   const items = [];
   for (const row of body.items) {
     const product = catalog.products.find(p => p.id === row?.id);
-    if (!product || !product.colors.includes(row.color) || !product.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty < 1 || row.qty > 99) return error('Un article ou une variante du panier a changé.');
-    items.push({ id: product.id, name: product.name, price: product.price, color: row.color, size: row.size, qty: row.qty });
+    if (!product || product.active===false || !product.colors.includes(row.color) || !product.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty < 1 || row.qty > 99) return error('Un article ou une variante du panier a changé.');
+    items.push({ id: product.id, name: product.name, gender:collectionLabels[product.gender], price: product.price, color: row.color, size: row.size, qty: row.qty });
   }
   const id = randomId(6).toUpperCase();
   const total = items.reduce((sum, row) => sum + Math.round(row.price * 100) * row.qty, 0) / 100;
   const order = { id, customer, items, status: statuses[0], createdAt: new Date().toISOString(), total };
-  await db.prepare('INSERT INTO orders VALUES (?, ?)').bind(id, JSON.stringify(order)).run();
+  const result=await db.prepare(insertOrderSql).bind(id,JSON.stringify(order),JSON.stringify(stockRequirements(items,catalog.products))).run();
+  if(!result.meta.changes) return error('Stock insuffisant. Vérifiez les quantités du panier.',409);
   return json({ order, whatsapp: catalog.store.whatsapp }, 201);
 }
 
@@ -202,8 +206,12 @@ async function handle(request, env) {
     if (!statuses.includes(body.status)) return error('Statut invalide.');
     const row = await db.prepare('SELECT value FROM orders WHERE id = ?').bind(orderId).first('value');
     if (!row) return error('Commande introuvable.', 404);
-    const order = { ...JSON.parse(row), status: body.status };
-    await db.prepare('UPDATE orders SET value = ? WHERE id = ?').bind(JSON.stringify(order), orderId).run();
+    const previous=JSON.parse(row);
+    const order={...previous,status:body.status};
+    const requirements=previous.status==='Annulée'&&order.status!=='Annulée'
+      ? stockRequirements(order.items,(await readCatalog(db)).catalog.products):[];
+    const result=await db.prepare(updateOrderSql).bind(JSON.stringify(order),orderId,row,JSON.stringify(requirements)).run();
+    if(!result.meta.changes) return error('Stock insuffisant ou commande modifiée. Actualisez la page.',409);
     return json(order);
   }
   return error('Route introuvable.', 404);
