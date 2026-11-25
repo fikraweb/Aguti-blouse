@@ -94,7 +94,7 @@ async function createOrder(db, body) {
   for (const row of body.items) {
     const product = catalog.products.find(p => p.id === row?.id);
     if (!product || product.active===false || !product.colors.includes(row.color) || !product.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty < 1 || row.qty > 99) return error('Un article ou une variante du panier a changé.');
-    items.push({ id: product.id, name: product.name, gender:collectionLabels[product.gender], price: product.price, color: row.color, size: row.size, qty: row.qty });
+    items.push({ id: product.id, name: product.name, gender:collectionLabels[product.gender], deliveryIncluded:product.deliveryIncluded===true, price: product.price, color: row.color, size: row.size, qty: row.qty });
   }
   const id = randomId(6).toUpperCase();
   const total = items.reduce((sum, row) => sum + Math.round(row.price * 100) * row.qty, 0) / 100;

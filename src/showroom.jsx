@@ -81,7 +81,7 @@ export function CollectionPage({catalog,gender,initialProduct,initialColor,categ
  const size=p?.sizes.includes(requestedSize)?requestedSize:'';
  const title=gender==='homme'?t('Collection Homme','مجموعة الرجال'):gender==='femme'?t('Collection Femme','مجموعة النساء'):(p?.name||t('Showroom','المعرض'));
  const soldOut=p?.stock===0;
- const order=p?`Bonjour Aguti, je souhaite commander ${p.name} · ${collectionLabels[p.gender]||''} · ${color} · ${size} · 1 × ${money(p.price)}.`:'';
+ const order=p?`Bonjour Aguti, je souhaite commander ${p.name} · ${collectionLabels[p.gender]||''} · ${color} · ${size} · 1 × ${money(p.price)}${p.deliveryIncluded?' (livraison incluse)':''}.`:'';
  return <section className="collection-page">
   <div className="container collection-shell">
    <nav className="collection-switch" aria-label={t('Collections','المجموعات')}>{collections.map(item=><a key={item.id} href={'/collection/'+item.id} aria-current={gender===item.id?'page':undefined}>{item.id==='homme'?t('Homme','رجال'):t('Femme','نساء')}</a>)}</nav>
@@ -90,7 +90,7 @@ export function CollectionPage({catalog,gender,initialProduct,initialColor,categ
     <Viewer key={p.id} p={p} color={color} t={t}/>
     <div className="showroom-options">
      {options.length>1&&<label>{t('Modèle','الموديل')}<select value={p.id} onChange={e=>{setId(Number(e.target.value));setColor(undefined);setSize('');}}>{options.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
-     <h2>{t(p.name,p.ar||p.name)}</h2><strong className="detail-price">{money(p.price)}</strong>
+     <h2>{t(p.name,p.ar||p.name)}</h2><div className="showroom-price"><strong className="detail-price">{money(p.price)}</strong>{p.deliveryIncluded&&<span>{t('Livraison incluse','بالتوصيل')}</span>}</div>
      {p.description&&<p className="muted">{p.description}</p>}
      {p.fabric&&<p className="showroom-fabric"><strong>{t('Tissu','القماش')}</strong> · {p.fabric}</p>}
      <fieldset><legend>{t('Couleur','اللون')} <span>{color}</span></legend><div className="showroom-swatches">{p.colors.map(c=><button key={c} type="button" aria-label={c} title={c} aria-pressed={c===color} onClick={()=>setColor(c)} style={{'--swatch':catalog.colors[c]}}/>)}</div></fieldset>

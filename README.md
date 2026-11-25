@@ -6,7 +6,7 @@ Boutique de vêtements professionnels au Maroc avec catalogue, panier, paiement 
 
 Utilisez Node.js 24 ou une version ultérieure. Depuis le dépôt existant, lancez `npm ci` puis `npm run dev`. Le serveur écoute par défaut sur le port 3000.
 
-Le showroom s’ouvre sur les collections Homme et Femme. Chaque collection propose six vues de studio pour chacune des onze couleurs du modèle médical. Les visuels sont générés puis déclinés par traitement du vêtement à partir de la même prise de vue pour chaque angle. Ils sont présentés comme des illustrations. Le prix initial de 299 MAD et les tailles XS à XXL sont modifiables dans l’administration. Les témoignages sont des exemples.
+Le showroom s’ouvre sur les collections Homme et Femme. Chaque collection propose six vues de studio pour chacune des onze couleurs du modèle médical. Les visuels sont générés puis déclinés par traitement du vêtement à partir de la même prise de vue pour chaque angle. Ils sont présentés comme des illustrations. Le prix initial de 180 MAD, livraison incluse, et les tailles XS à XXL sont modifiables dans l’administration. Les témoignages sont des exemples.
 
 ## Administration et commandes
 

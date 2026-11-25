@@ -107,3 +107,6 @@
 }
 .stage-arrows .icon{border:1px solid #213d4526;box-shadow:0 2px 7px #112a3422}
 .stage-arrows svg,.portal-label svg,.editorial-photo svg{stroke-width:1.65}
+.showroom-price{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.showroom-price span{font-size:13px;color:#30695e;font-weight:700}
+.campaign-hero .hero-inner .campaign-price{color:#a3ebd4;font-weight:800;font-size:clamp(19px,2.1vw,29px);margin-top:10px}

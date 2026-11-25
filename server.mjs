@@ -78,7 +78,7 @@ app.post('/api/orders',limit('order',15,60000),(req,res)=>{
  for (const row of source) {
   const p=catalog.products.find(p=>p.id===row?.id);
   if (!p || p.active===false || !p.colors.includes(row.color) || !p.sizes.includes(row.size) || !Number.isInteger(row.qty) || row.qty<1 || row.qty>99) return res.status(400).json({error:'Un article ou une variante du panier a changé.'});
-  items.push({id:p.id,name:p.name,gender:collectionLabels[p.gender],price:p.price,color:row.color,size:row.size,qty:row.qty});
+  items.push({id:p.id,name:p.name,gender:collectionLabels[p.gender], deliveryIncluded:p.deliveryIncluded===true,price:p.price,color:row.color,size:row.size,qty:row.qty});
  }
  const id=randomBytes(6).toString('hex').toUpperCase();
  const order={id,customer,items,status:'En attente WhatsApp',createdAt:new Date().toISOString(),total:items.reduce((sum,row)=>sum+Math.round(row.price*100)*row.qty,0)/100};

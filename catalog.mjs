@@ -27,6 +27,7 @@ export const colors = {
 };
 
 export function withShowroomDefaults(product) {
+ if([101,102].includes(product.id)&&product.deliveryIncluded===undefined) product={...product,price:180,deliveryIncluded:true};
  const gender=product.gender||(product.id===101?'femme':product.id===102?'homme':undefined);
  if(!gender) return product;
  if(product.images[0]!==referencePhoto||![101,102].includes(product.id)) return {...product,gender};
@@ -35,7 +36,7 @@ export function withShowroomDefaults(product) {
 }
 
 const details = {
- category:'medical', price:299, images:[referencePhoto], colors:Object.keys(uniformColors),
+ category:'medical', price:180, deliveryIncluded:true, images:[referencePhoto], colors:Object.keys(uniformColors),
  sizes:['XS','S','M','L','XL','XXL'],
  description:'Ensemble médical deux pièces, avec haut à col V à poches et pantalon assorti.',
 };

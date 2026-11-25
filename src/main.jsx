@@ -46,6 +46,9 @@ const campaignBenefits = [
 ];
 
 function CampaignHero(){
+ const {catalog}=useShop();
+ const models=catalog.products.filter(p=>p.active!==false&&[101,102].includes(p.id));
+ const price=models.length&&models.every(p=>p.deliveryIncluded&&p.price===models[0].price)?models[0].price:null;
  return <section aria-labelledby="campaign-title" className="campaign-hero" lang="ar" dir="rtl">
   <div className="hero">
    <img className="hero-photo" src="/images/hero-campaign-hd.webp" srcSet="/images/hero-campaign-compact.webp 900w, /images/hero-campaign-hd.webp 1536w" sizes="(max-width: 720px) 145vw, 100vw" fetchPriority="high" alt=""/>
@@ -53,6 +56,7 @@ function CampaignHero(){
     <h1 id="campaign-title">ملابس طبية</h1>
     <p className="campaign-subtitle">جودة عالية .. راحة تامة</p>
     <p className="campaign-tagline">اختيارك الأمثل للراحة والأناقة</p>
+    {price!==null&&<p className="campaign-price">{price} درهم بالتوصيل</p>}
     <div className="hero-actions">
      <a className="button mint" href="#collections">اختار طقمك <ArrowRight size={18}/></a>
      <Whats className="button glass">اطلب عبر واتساب</Whats>
@@ -83,6 +87,7 @@ function Cart(){
  const {t,cart,setCart,catalog,setCartOpen}=useShop();
  const [checkout,setCheckout]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[confirmation,setConfirmation]=useState(null);
  const selected=cart.map(row=>({...row,p:catalog.products.find(p=>p.id===row.id)}));
+ const deliveryIncluded=selected.length>0&&selected.every(row=>row.p?.deliveryIncluded);
  const total=selected.reduce((sum,row)=>sum+(row.p?.price||0)*row.qty,0);
  function change(i,qty){setCart(prev=>prev.flatMap((row,index)=>i!==index?[row]:qty?[{...row,qty}]:[]));}
  async function submit(e){
@@ -90,11 +95,11 @@ function Cart(){
   try{
    const {order,whatsapp}=await api('/orders','POST',{customer:Object.fromEntries(new FormData(e.currentTarget)),items:cart});
    const {customer,items}=order;
-   const message=['Bonjour Aguti, je souhaite confirmer la commande '+order.id+'.','',...items.map(i=>`${i.qty} × ${i.name}${i.gender?' · '+i.gender:''} · ${i.color} · ${i.size} · ${amount(i.qty*i.price)}`),'','Total produits : '+amount(order.total),'Paiement à la livraison','Nom : '+customer.name,'Téléphone : '+customer.phone,'Ville : '+customer.city,'Adresse : '+customer.address].join('\n');
+   const message=['Bonjour Aguti, je souhaite confirmer la commande '+order.id+'.','',...items.map(i=>`${i.qty} × ${i.name}${i.gender?' · '+i.gender:''} · ${i.color} · ${i.size} · ${amount(i.qty*i.price)}`),'',(items.every(i=>i.deliveryIncluded)?'Total, livraison incluse : ':'Total produits : ')+amount(order.total),'Paiement à la livraison','Nom : '+customer.name,'Téléphone : '+customer.phone,'Ville : '+customer.city,'Adresse : '+customer.address].join('\n');
    setConfirmation({id:order.id,url:wa(whatsapp,message)});
   }catch(err){setError(err.message);}finally{setBusy(false);}
  }
- return <Modal drawer label={t('Panier','السلة')} close={()=>setCartOpen(false)}><h2>{checkout?t('Votre commande','طلبك'):t('Votre panier','سلتك')}</h2>{confirmation?<div className="stack"><p><Check size={20}/> {t('Commande enregistrée','تم تسجيل الطلب')} #{confirmation.id}</p><p>{t('Envoyez le récapitulatif sur WhatsApp pour finaliser la commande.','أرسل ملخص الطلب على واتساب لتأكيده.')}</p><a className="button dark" href={confirmation.url} target="_blank" rel="noopener noreferrer" onClick={()=>setCart([])}><MessageCircle size={18}/>{t('Ouvrir WhatsApp','افتح واتساب')}</a></div>:!cart.length?<div className="empty"><ShoppingBag/><p>{t('Votre panier est vide.','سلتك فارغة.')}</p><a className="button dark" href="/boutique">{t('Voir la boutique','عرض المتجر')}</a></div>:<><div className="cart-items">{selected.map((row,i)=><div className="cart-item" key={[row.id,row.color,row.size].join('|')}>{row.p&&<ProductImage p={row.p} color={row.color}/>}<div><strong>{row.p?.name||t('Article indisponible','منتج غير متاح')}</strong><small>{row.color} · {row.size}</small><Quantity qty={row.qty} onChange={qty=>change(i,qty)}/></div><div><strong>{amount((row.p?.price||0)*row.qty)}</strong><button className="icon" onClick={()=>change(i,0)} aria-label="Supprimer"><X size={16}/></button></div></div>)}</div><div className="cart-total"><strong>{t('Total produits','إجمالي المنتجات')}</strong><strong>{amount(total)}</strong></div><p className="muted">{t('Paiement à la livraison. Frais de livraison à confirmer.','الدفع عند الاستلام. يتم تأكيد رسوم التوصيل.')}</p>{checkout?<form className="stack" onSubmit={submit}>{[['name','Nom complet','الاسم الكامل'],['phone','Téléphone','الهاتف'],['city','Ville','المدينة'],['address','Adresse complète','العنوان الكامل']].map(([key,fr,ar])=><label key={key}>{t(fr,ar)}<input name={key} required type={key==='phone'?'tel':'text'} maxLength={key==='address'?300:100}/></label>)}{error&&<p className="error" role="alert">{error}</p>}<button className="button dark" disabled={busy}><MessageCircle size={17}/>{busy?t('Enregistrement…','جاري التسجيل…'):t('Préparer la commande WhatsApp','جهز طلب واتساب')}</button></form>:<button className="button dark" onClick={()=>setCheckout(true)}>{t('Passer commande','اطلب الآن')} <ArrowRight size={17}/></button>}</>}</Modal>;
+ return <Modal drawer label={t('Panier','السلة')} close={()=>setCartOpen(false)}><h2>{checkout?t('Votre commande','طلبك'):t('Votre panier','سلتك')}</h2>{confirmation?<div className="stack"><p><Check size={20}/> {t('Commande enregistrée','تم تسجيل الطلب')} #{confirmation.id}</p><p>{t('Envoyez le récapitulatif sur WhatsApp pour finaliser la commande.','أرسل ملخص الطلب على واتساب لتأكيده.')}</p><a className="button dark" href={confirmation.url} target="_blank" rel="noopener noreferrer" onClick={()=>setCart([])}><MessageCircle size={18}/>{t('Ouvrir WhatsApp','افتح واتساب')}</a></div>:!cart.length?<div className="empty"><ShoppingBag/><p>{t('Votre panier est vide.','سلتك فارغة.')}</p><a className="button dark" href="/boutique">{t('Voir la boutique','عرض المتجر')}</a></div>:<><div className="cart-items">{selected.map((row,i)=><div className="cart-item" key={[row.id,row.color,row.size].join('|')}>{row.p&&<ProductImage p={row.p} color={row.color}/>}<div><strong>{row.p?.name||t('Article indisponible','منتج غير متاح')}</strong><small>{row.color} · {row.size}</small><Quantity qty={row.qty} onChange={qty=>change(i,qty)}/></div><div><strong>{amount((row.p?.price||0)*row.qty)}</strong><button className="icon" onClick={()=>change(i,0)} aria-label="Supprimer"><X size={16}/></button></div></div>)}</div><div className="cart-total"><strong>{deliveryIncluded?t('Total, livraison incluse','المجموع بالتوصيل'):t('Total produits','إجمالي المنتجات')}</strong><strong>{amount(total)}</strong></div><p className="muted">{deliveryIncluded?t('Paiement à la livraison.','الدفع عند الاستلام.'):t('Paiement à la livraison. Frais de livraison à confirmer.','الدفع عند الاستلام. يتم تأكيد رسوم التوصيل.')}</p>{checkout?<form className="stack" onSubmit={submit}>{[['name','Nom complet','الاسم الكامل'],['phone','Téléphone','الهاتف'],['city','Ville','المدينة'],['address','Adresse complète','العنوان الكامل']].map(([key,fr,ar])=><label key={key}>{t(fr,ar)}<input name={key} required type={key==='phone'?'tel':'text'} maxLength={key==='address'?300:100}/></label>)}{error&&<p className="error" role="alert">{error}</p>}<button className="button dark" disabled={busy}><MessageCircle size={17}/>{busy?t('Enregistrement…','جاري التسجيل…'):t('Préparer la commande WhatsApp','جهز طلب واتساب')}</button></form>:<button className="button dark" onClick={()=>setCheckout(true)}>{t('Passer commande','اطلب الآن')} <ArrowRight size={17}/></button>}</>}</Modal>;
 }
 function Footer(){
  const {catalog,t,lang}=useShop();

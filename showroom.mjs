@@ -13,7 +13,8 @@ export const showroomImage = (gender,color,angle='front') => `/images/showroom-$
 export const mediaPath = /^\/(?:images|uploads)\/[a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|webp)$/;
 
 export function validShowroom(product) {
- const {gender,stock,active,fabric,gallery}=product;
+ const {gender,stock,active,fabric,gallery,deliveryIncluded}=product;
+ if(deliveryIncluded!==undefined&&typeof deliveryIncluded!=='boolean') return false;
  if(gender!==undefined&&!Object.hasOwn(collectionLabels,gender)) return false;
  if(stock!=null&&(!Number.isSafeInteger(stock)||stock<0||stock>1000000)) return false;
  if(active!==undefined&&typeof active!=='boolean') return false;
